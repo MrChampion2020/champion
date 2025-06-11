@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+.dark {
+  --bg-primary: #111827;
+  --text-primary: #ffffff;
+  --accent: #3b82f6;
+}
+.light {
+  --bg-primary: #ffffff;
+  --text-primary: #111827;
+  --accent: #9333ea;
+}
+
 * {
   margin: 0;
   padding: 0;
