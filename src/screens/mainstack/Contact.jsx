@@ -1,7 +1,6 @@
-
-import React, { useState, useContext } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Instagram, Linkedin, Github } from 'lucide-react';
+import React, { useState, useContext, useCallback, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock, Instagram, Linkedin, Github, CheckCircle, AlertCircle } from 'lucide-react';
 import { Tilt } from 'react-tilt';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -9,30 +8,34 @@ import { ThemeContext } from '../../screens/context/ThemeContext';
 import axios from 'axios';
 import API_URL from './config';
 import { useMediaQuery } from 'react-responsive';
+import Particles from '@tsparticles/react';
+import { loadSlim } from '@tsparticles/slim';
 
 // Animation Variants
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { delayChildren: 0.4, staggerChildren: 0.3 },
-  },
+  visible: { opacity: 1, transition: { delayChildren: 0.3, staggerChildren: 0.2 } },
 };
 
 const itemVariants = {
-  hidden: { y: 50, opacity: 0 },
+  hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 120, damping: 15 } },
 };
 
 const letterVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
 
 const inputVariants = {
   hidden: { scale: 0.95, opacity: 0 },
   visible: { scale: 1, opacity: 1, transition: { duration: 0.5 } },
   focus: { scale: 1.02, boxShadow: '0 0 12px var(--accent)' },
+};
+
+const errorVariants = {
+  hidden: { opacity: 0, height: 0 },
+  visible: { opacity: 1, height: 'auto', transition: { duration: 0.3 } },
 };
 
 // Animated Text Component
@@ -47,19 +50,105 @@ const AnimatedText = ({ text }) => (
 );
 
 const Contact = () => {
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext) || { theme: 'dark' };
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formErrors, setFormErrors] = useState({ name: [], email: [], subject: [], message: [] });
+  const [touched, setTouched] = useState({ name: false, email: false, subject: false, message: false });
   const [submitStatus, setSubmitStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [particlesInit, setParticlesInit] = useState(false);
   const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
   const isTablet = useMediaQuery({ query: '(max-width: 768px)' });
+  const { scrollYProgress } = useScroll();
+  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  const validateField = (name, value) => {
+    const errors = [];
+
+    switch (name) {
+      case 'name':
+        if (!value) errors.push('Yo, put a name in there, dummy!');
+        if (value.length < 2) errors.push('Name’s too short, c’mon, give more!');
+        if (value.length > 50) errors.push('Whoa, name’s too long, chill out!');
+        if (!/^[a-zA-Z\s'-]+$/.test(value)) errors.push('No weird stuff in name, just letters and spaces, okay?');
+        break;
+      case 'email':
+        if (!value) errors.push('Oops, need an email, silly!');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push('That email looks funky, fix it!');
+        if (value.length > 100) errors.push('Email’s too big, shrink it down!');
+        if (!/\.[a-zA-Z]{2,}$/.test(value)) errors.push('Gimme a real email domain, dude!');
+        break;
+      case 'subject':
+        if (!value) errors.push('Hey, gimme a subject, don’t be lazy!');
+        if (value.length < 3) errors.push('Subject’s too tiny, make it bigger!');
+        if (value.length > 100) errors.push('Subject’s too huge, cut it down!');
+        break;
+      case 'message':
+        if (!value) errors.push('Write something, you goofball!');
+        if (value.length < 10) errors.push('Message’s too short, add more junk!');
+        if (value.length > 1000) errors.push('Whoa, message’s a novel, tone it down!');
+        if (value.split(/\s+/).length < 3) errors.push('Need more words, at least 3, lazybones!');
+        break;
+      default:
+        break;
+    }
+
+    return errors;
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach((field) => {
+      const fieldErrors = validateField(field, formData[field]);
+      errors[field] = fieldErrors;
+      if (fieldErrors.length > 0) isValid = false;
+    });
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const initParticles = useCallback(async (engine) => {
+    try {
+      await loadSlim(engine);
+      setParticlesInit(true);
+      console.log('Particles initialized');
+    } catch (error) {
+      console.error('Particles init error:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('Contact rendered, theme:', theme, 'particlesInit:', particlesInit);
+  }, [theme, particlesInit]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setTouched({ ...touched, [name]: true });
+
+    // Real-time validation
+    setFormErrors({ ...formErrors, [name]: validateField(name, value) });
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched({ ...touched, [name]: true });
+    setFormErrors({ ...formErrors, [name]: validateField(name, formData[name]) });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Mark all fields as touched
+    setTouched({ name: true, email: true, subject: true, message: true });
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const response = await axios.post(`${API_URL}/api/contact`, formData, {
@@ -67,7 +156,9 @@ const Contact = () => {
       });
       if (response.status === 200) {
         setSubmitStatus('success');
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        setFormData({ name: '', email: '', subject: '', message: '' }); // Clear input fields on success
+        setFormErrors({ name: [], email: [], subject: [], message: [] });
+        setTouched({ name: false, email: false, subject: false, message: false });
       } else {
         setSubmitStatus('error');
       }
@@ -79,8 +170,20 @@ const Contact = () => {
     }
   };
 
+  const getInputStatus = (field) => {
+    if (!touched[field]) return 'neutral';
+    return formErrors[field].length === 0 && formData[field] ? 'success' : 'error';
+  };
+
+  const getButtonTextAndStyle = () => {
+    if (isProcessing) return { text: 'Sending...', className: 'opacity-50 cursor-not-allowed' };
+    if (submitStatus === 'success') return { text: 'Sent!', className: 'bg-green-500' };
+    if (submitStatus === 'error') return { text: 'Failed!', className: 'bg-red-500' };
+    return { text: 'Send Message', className: 'bg-gradient-to-r from-blue-600 to-purple-600' };
+  };
+
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
       <style>
         {`
           :root {
@@ -88,7 +191,7 @@ const Contact = () => {
             --neon-purple: #9333ea;
           }
           .dark {
-            --card-bg: rgba(17, 24, 39, 0.6);
+            --card-bg: rgba(17, 24, 39, 0.7);
             --text-primary: #ffffff;
             --text-secondary: #d1d5db;
             --accent: var(--neon-blue);
@@ -101,37 +204,126 @@ const Contact = () => {
           }
           .glass-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
           }
           .glow {
-            box-shadow: 0 0 15px var(--accent);
+            box-shadow: 0 0 8px var(--accent);
           }
           .gradient-text {
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
           }
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
-          body { font-family: 'Poppins', sans-serif; }
+          .parallax-bg {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            opacity: 0.1;
+          }
+          @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+          body { font-family: 'Comic Neue', cursive; }
+          .hero-text {
+            position: relative;
+            z-index: 20 !important;
+          }
+          .input-container {
+            position: relative;
+          }
+          .input-status-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+          }
+          .error-message {
+            display: block;
+            color: #ff6347;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            font-style: italic;
+          }
+          .input-error {
+            border-color: #ff6347 !important;
+            box-shadow: 0 0 8px rgba(255, 99, 71, 0.3);
+            animation: shake 0.5s;
+          }
+          .input-success {
+            border-color: #32cd32 !important;
+            box-shadow: 0 0 8px rgba(50, 205, 50, 0.3);
+          }
+          @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+          }
         `}
       </style>
       <Navbar />
+      {/* Hero Section */}
       <motion.section
-        className="py-24 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden"
+        initial="hidden"
+        animate="visible"
+        transition={{ duration: 0.8 }}
+      >
+        <Particles
+          id="particles"
+          init={initParticles}
+          options={{
+            particles: {
+              number: { value: 50 },
+              size: { value: 3 },
+              move: { speed: 0.5 },
+              links: { enable: true, distance: 150, opacity: 0.4 },
+              color: { value: theme === 'dark' ? '#3b82f6' : '#9333ea' },
+            },
+            interactivity: {
+              events: { onHover: { enable: true, mode: 'repulse' } },
+            },
+            style: { position: 'absolute', zIndex: 0 },
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'rgba(0, 0, 0, 0.5)', zIndex: 10 }}
+        />
+        <motion.div
+          className="relative text-center hero-text"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1
+            className="text-4xl md:text-6xl font-bold gradient-text mb-4"
+            variants={itemVariants}
+            style={{ zIndex: 20 }}
+          >
+            <AnimatedText text="Contact Us" />
+          </motion.h1>
+          <motion.p
+            className="text-lg md:text-xl max-w-2xl mx-auto"
+            variants={itemVariants}
+            style={{ color: 'var(--text-secondary)', zIndex: 20 }}
+          >
+            I am committed to providing exceptional support and collaboration opportunities. Please reach out to discuss your needs.
+          </motion.p>
+        </motion.div>
+      </motion.section>
+      {/* Contact Form and Info Section */}
+      <motion.section
+        className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: false }}
       >
-        <motion.h1
-          variants={itemVariants}
-          className={`text-4xl md:text-5xl font-extrabold text-center mb-12 gradient-text ${isMobile ? 'text-3xl' : isTablet ? 'text-4xl' : ''}`}
-        >
-          <AnimatedText text="Connect with Me" />
-        </motion.h1>
+        <motion.div
+          className="absolute inset-0 parallax-bg"
+          style={{ transform: useTransform(scrollYProgress, [0, 1], ['translateY(0%)', 'translateY(-20%)']) }}
+        />
         <div className={`grid ${isTablet ? 'grid-cols-1' : 'grid-cols-2'} gap-12`}>
           {/* Form Section */}
           <Tilt options={{ max: 15, scale: 1.03 }}>
@@ -142,9 +334,9 @@ const Contact = () => {
               >
                 <AnimatedText text="Send a Message" />
               </motion.h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 {['name', 'email', 'subject'].map((field) => (
-                  <div key={field}>
+                  <div key={field} className="input-container">
                     <label
                       htmlFor={field}
                       className="block text-sm font-medium"
@@ -158,14 +350,34 @@ const Contact = () => {
                       name={field}
                       value={formData[field]}
                       onChange={handleChange}
-                      required
-                      className="mt-1 block w-full rounded-md bg-gray-700/50 text-white border border-gray-600 focus:border-[var(--accent)] focus:ring-[var(--accent)] p-3"
+                      onBlur={handleBlur}
+                      className={`mt-2 block w-full rounded-lg bg-gray-700/30 text-white border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 ${
+                        getInputStatus(field) === 'error' ? 'input-error' :
+                        getInputStatus(field) === 'success' ? 'input-success' : ''
+                      }`}
                       variants={inputVariants}
                       whileFocus="focus"
                     />
+                    {getInputStatus(field) === 'success' && (
+                      <CheckCircle className="input-status-icon text-green-500" size={20} />
+                    )}
+                    {getInputStatus(field) === 'error' && (
+                      <AlertCircle className="input-status-icon text-red-500" size={20} />
+                    )}
+                    {formErrors[field].map((error, index) => (
+                      <motion.span
+                        key={index}
+                        variants={errorVariants}
+                        initial="hidden"
+                        animate={touched[field] ? 'visible' : 'hidden'}
+                        className="error-message"
+                      >
+                        {error}
+                      </motion.span>
+                    ))}
                   </div>
                 ))}
-                <div>
+                <div className="input-container">
                   <label
                     htmlFor="message"
                     className="block text-sm font-medium"
@@ -178,33 +390,45 @@ const Contact = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    required
+                    onBlur={handleBlur}
                     rows={5}
-                    className="mt-1 block w-full rounded-md bg-gray-700/50 text-white border border-gray-600 focus:border-[var(--accent)] focus:ring-[var(--accent)] p-3"
+                    className={`mt-2 block w-full rounded-lg bg-gray-700/30 text-white border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 ${
+                      getInputStatus('message') === 'error' ? 'input-error' :
+                      getInputStatus('message') === 'success' ? 'input-success' : ''
+                    }`}
                     variants={inputVariants}
                     whileFocus="focus"
                   />
+                  {getInputStatus('message') === 'success' && (
+                    <CheckCircle className="input-status-icon text-green-500" size={20} style={{ top: '30px' }} />
+                  )}
+                  {getInputStatus('message') === 'error' && (
+                    <AlertCircle className="input-status-icon text-red-500" size={20} style={{ top: '30px' }} />
+                  )}
+                  {formErrors.message.map((error, index) => (
+                    <motion.span
+                      key={index}
+                      variants={errorVariants}
+                      initial="hidden"
+                      animate={touched.message ? 'visible' : 'hidden'}
+                      className="error-message"
+                    >
+                      {error}
+                    </motion.span>
+                  ))}
                 </div>
                 <motion.button
                   type="submit"
-                  className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md glow ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  className={`px-6 py-3 rounded-lg text-white font-medium glow ${getButtonTextAndStyle().className} ${
+                    isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                   disabled={isProcessing}
                   whileHover={{ scale: isProcessing ? 1 : 1.05 }}
                   whileTap={{ scale: isProcessing ? 1 : 0.95 }}
                 >
-                  {isProcessing ? 'Sending...' : 'Send Message'}
+                  {getButtonTextAndStyle().text}
                 </motion.button>
               </form>
-              {submitStatus === 'success' && (
-                <motion.p variants={itemVariants} className="text-green-400 mt-6 font-medium">
-                  Message sent successfully!
-                </motion.p>
-              )}
-              {submitStatus === 'error' && (
-                <motion.p variants={itemVariants} className="text-red-400 mt-6 font-medium">
-                  Error sending message. Please try again.
-                </motion.p>
-              )}
             </motion.div>
           </Tilt>
           {/* Contact Info Section */}
@@ -214,7 +438,7 @@ const Contact = () => {
                 variants={itemVariants}
                 className={`text-2xl font-bold mb-6 gradient-text ${isMobile ? 'text-xl' : ''}`}
               >
-                <AnimatedText text="Contact Information" />
+                <AnimatedText text="Contact Info" />
               </motion.h2>
               <div className="space-y-6">
                 {[
@@ -228,15 +452,17 @@ const Contact = () => {
                       {info.icon}
                     </motion.div>
                     <div>
-                      <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {info.title}
                       </h3>
-                      <p style={{ color: 'var(--text-secondary)' }}>{info.value}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {info.value}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-base font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
                     Follow Me
                   </h3>
                   <div className="flex space-x-4">
@@ -261,720 +487,13 @@ const Contact = () => {
           </Tilt>
         </div>
       </motion.section>
+      <motion.div
+        className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-purple-600 z-50"
+        style={{ scaleX }}
+      />
       <Footer />
     </div>
   );
 };
 
 export default Contact;
-
-
-
-
-
-// import React, { useState } from "react";
-// import { motion } from "framer-motion";
-// import { MapPin, Phone, Mail, Clock, Instagram, Linkedin, Github } from "lucide-react";
-// import Navbar from "../../components/Navbar";
-// import Footer from "../../components/Footer";
-// import API_URL from "./config";
-// import axios from "axios";
-// import { useMediaQuery } from "react-responsive";
-
-// // Animation Variants
-// const containerVariants = {
-//   hidden: { opacity: 0 },
-//   visible: {
-//     opacity: 1,
-//     transition: {
-//       delayChildren: 0.3,
-//       staggerChildren: 0.2,
-//     },
-//   },
-// };
-
-// const itemVariants = {
-//   hidden: { y: 50, opacity: 0 },
-//   visible: {
-//     y: 0,
-//     opacity: 1,
-//     transition: { duration: 0.8, ease: "easeOut" },
-//   },
-// };
-
-// const letterVariants = {
-//   hidden: { opacity: 0, y: 20 },
-//   visible: {
-//     opacity: 1,
-//     y: 0,
-//     transition: { duration: 0.5 },
-//   },
-// };
-
-// const inputVariants = {
-//   hidden: { scale: 0.95, opacity: 0 },
-//   visible: { scale: 1, opacity: 1, transition: { duration: 0.5 } },
-//   focus: { scale: 1.02, boxShadow: "0 0 8px rgba(59, 130, 246, 0.5)" },
-// };
-
-// // Animated Text Component
-// const AnimatedText = ({ text }) => {
-//   return (
-//     <span>
-//       {text.split("").map((char, index) => (
-//         <motion.span
-//           key={index}
-//           variants={letterVariants}
-//           style={{ display: "inline-block" }}
-//         >
-//           {char}
-//         </motion.span>
-//       ))}
-//     </span>
-//   );
-// };
-
-// export default function Contact() {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     subject: "",
-//     message: "",
-//   });
-//   const [submitStatus, setSubmitStatus] = useState(null);
-//   const [isProcessing, setIsProcessing] = useState(false);
-
-//   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
-//   const isTablet = useMediaQuery({ query: "(max-width: 768px)" });
-//   const isDesktop = useMediaQuery({ query: "(max-width: 1024px)" });
-//   const isLarge = useMediaQuery({ query: "(min-width: 1280px)" });
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setIsProcessing(true);
-//     try {
-//       const response = await axios.post(`${API_URL}/api/contact`, formData, {
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       });
-//       if (response.status === 200) {
-//         setSubmitStatus("success");
-//         setFormData({ name: "", email: "", subject: "", message: "" });
-//       } else {
-//         setSubmitStatus("error");
-//       }
-//     } catch (error) {
-//       console.error("Error:", error);
-//       setSubmitStatus("error");
-//     } finally {
-//       setIsProcessing(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-900 text-white font-sans">
-//       <style>
-//         {`
-//           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
-//           body { font-family: 'Poppins', sans-serif; }
-//         `}
-//       </style>
-//       <Navbar />
-//       <motion.section
-//         className="py-20 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-//         variants={containerVariants}
-//         initial="hidden"
-//         animate="visible"
-//       >
-//         <motion.h1
-//           variants={itemVariants}
-//           className={`font-bold text-center text-blue-400 mb-12 ${
-//             isMobile ? "text-3xl" : isTablet ? "text-4xl" : "text-5xl"
-//           }`}
-//         >
-//           <AnimatedText text="Get in Touch" />
-//         </motion.h1>
-
-//         <div className={`grid ${isTablet ? "grid-cols-1" : "grid-cols-2"} gap-12`}>
-//           {/* Form Section */}
-//           <motion.div variants={itemVariants} className="space-y-6">
-//             <motion.h2
-//               variants={itemVariants}
-//               className={`font-bold text-blue-400 mb-6 ${
-//                 isMobile ? "text-xl" : "text-2xl"
-//               }`}
-//             >
-//               <AnimatedText text="Send  a  Message" />
-//             </motion.h2>
-//             <form onSubmit={handleSubmit} className="space-y-6">
-//               <div>
-//                 <label
-//                   htmlFor="name"
-//                   className="block text-sm font-medium text-gray-300"
-//                 >
-//                   Name
-//                 </label>
-//                 <motion.input
-//                   type="text"
-//                   id="name"
-//                   name="name"
-//                   value={formData.name}
-//                   onChange={handleChange}
-//                   required
-//                   className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700/50 backdrop-blur-sm text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
-//                   variants={inputVariants}
-//                   whileFocus="focus"
-//                 />
-//               </div>
-//               <div>
-//                 <label
-//                   htmlFor="email"
-//                   className="block text-sm font-medium text-gray-300"
-//                 >
-//                   Email
-//                 </label>
-//                 <motion.input
-//                   type="email"
-//                   id="email"
-//                   name="email"
-//                   value={formData.email}
-//                   onChange={handleChange}
-//                   required
-//                   className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700/50 backdrop-blur-sm text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
-//                   variants={inputVariants}
-//                   whileFocus="focus"
-//                 />
-//               </div>
-//               <div>
-//                 <label
-//                   htmlFor="subject"
-//                   className="block text-sm font-medium text-gray-300"
-//                 >
-//                   Subject
-//                 </label>
-//                 <motion.input
-//                   type="text"
-//                   id="subject"
-//                   name="subject"
-//                   value={formData.subject}
-//                   onChange={handleChange}
-//                   required
-//                   className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700/50 backdrop-blur-sm text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
-//                   variants={inputVariants}
-//                   whileFocus="focus"
-//                 />
-//               </div>
-//               <div>
-//                 <label
-//                   htmlFor="message"
-//                   className="block text-sm font-medium text-gray-300"
-//                 >
-//                   Message
-//                 </label>
-//                 <motion.textarea
-//                   id="message"
-//                   name="message"
-//                   value={formData.message}
-//                   onChange={handleChange}
-//                   required
-//                   rows={5}
-//                   className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700/50 backdrop-blur-sm text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3"
-//                   variants={inputVariants}
-//                   whileFocus="focus"
-//                 />
-//               </div>
-//               <motion.button
-//                 type="submit"
-//                 className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-medium rounded-md transition ${
-//                   isProcessing ? "opacity-70 cursor-not-allowed" : "hover:from-blue-600 hover:to-blue-800"
-//                 }`}
-//                 disabled={isProcessing}
-//                 whileHover={{ scale: isProcessing ? 1 : 1.05 }}
-//                 whileTap={{ scale: isProcessing ? 1 : 0.95 }}
-//                 style={{ width: isMobile ? "100%" : isTablet ? "50%" : "auto" }}
-//               >
-//                 {isProcessing ? "Sending..." : "Send Message"}
-//               </motion.button>
-//             </form>
-//             {submitStatus === "success" && (
-//               <motion.p
-//                 variants={itemVariants}
-//                 className="text-green-400 mt-6 font-medium"
-//               >
-//                 Message sent successfully!
-//               </motion.p>
-//             )}
-//             {submitStatus === "error" && (
-//               <motion.p
-//                 variants={itemVariants}
-//                 className="text-red-400 mt-6 font-medium"
-//               >
-//                 There was an error sending your message. Please try again.
-//               </motion.p>
-//             )}
-//           </motion.div>
-
-//           {/* Contact Information Section */}
-//           <motion.div variants={itemVariants} className="space-y-6">
-//             <motion.h2
-//               variants={itemVariants}
-//               className={`font-bold text-blue-400 mb-6 ${
-//                 isMobile ? "text-xl" : "text-2xl"
-//               }`}
-//             >
-//               <AnimatedText text="Contact Information" />
-//             </motion.h2>
-//             <div className="space-y-6 bg-gray-800/50 backdrop-blur-sm rounded-lg p-6">
-//               <motion.div
-//                 className="flex items-center space-x-4"
-//                 variants={itemVariants}
-//               >
-//                 <motion.div whileHover={{ scale: 1.2 }}>
-//                   <Mail className="h-6 w-6 text-blue-400" />
-//                 </motion.div>
-//                 <div>
-//                   <h3 className="text-lg font-semibold text-white">Email</h3>
-//                   <p className="text-gray-300">championaden.ca@gmail.com</p>
-//                 </div>
-//               </motion.div>
-//               <motion.div
-//                 className="flex items-center space-x-4"
-//                 variants={itemVariants}
-//               >
-//                 <motion.div whileHover={{ scale: 1.2 }}>
-//                   <Phone className="h-6 w-6 text-blue-400" />
-//                 </motion.div>
-//                 <div>
-//                   <h3 className="text-lg font-semibold text-white">Phone</h3>
-//                   <p className="text-gray-300">+2349030155327</p>
-//                 </div>
-//               </motion.div>
-//               <motion.div
-//                 className="flex items-center space-x-4"
-//                 variants={itemVariants}
-//               >
-//                 <motion.div whileHover={{ scale: 1.2 }}>
-//                   <MapPin className="h-6 w-6 text-blue-400" />
-//                 </motion.div>
-//                 <div>
-//                   <h3 className="text-lg font-semibold text-white">Address</h3>
-//                   <p className="text-gray-300">101, Ajah, Lagos, Nigeria</p>
-//                 </div>
-//               </motion.div>
-//               <motion.div
-//                 className="flex items-center space-x-4"
-//                 variants={itemVariants}
-//               >
-//                 <motion.div whileHover={{ scale: 1.2 }}>
-//                   <Clock className="h-6 w-6 text-blue-400" />
-//                 </motion.div>
-//                 <div>
-//                   <h3 className="text-lg font-semibold text-white">Availability</h3>
-//                   <p className="text-gray-300">Open to work</p>
-//                 </div>
-//               </motion.div>
-//               <div className="mt-6">
-//                 <h3 className="text-lg font-semibold text-white mb-4">Follow Me</h3>
-//                 <div className="flex space-x-4">
-//                   <motion.a
-//                     href="#"
-//                     className="text-gray-400 hover:text-blue-400"
-//                     whileHover={{ scale: 1.2 }}
-//                   >
-//                     <Instagram className="h-6 w-6" />
-//                   </motion.a>
-//                   <motion.a
-//                     href="#"
-//                     className="text-gray-400 hover:text-blue-400"
-//                     whileHover={{ scale: 1.2 }}
-//                   >
-//                     <Linkedin className="h-6 w-6" />
-//                   </motion.a>
-//                   <motion.a
-//                     href="https://github.com/MrChampion2020"
-//                     className="text-gray-400 hover:text-blue-400"
-//                     whileHover={{ scale: 1.2 }}
-//                   >
-//                     <Github className="h-6 w-6" />
-//                   </motion.a>
-//                 </div>
-//               </div>
-//             </div>
-//           </motion.div>
-//         </div>
-//       </motion.section>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-
-
-
-// // import React, { useState } from "react";
-// // import { MapPin, Phone, Mail, Clock } from "lucide-react";
-// // import Navbar from "../../components/Navbar";
-// // import Footer from "../../components/Footer";
-// // import API_URL from "./config";
-// // import axios from 'axios'; // Ensure axios is imported
-
-// // export default function Contact() {
-// //   const [formData, setFormData] = useState({
-// //     name: "",
-// //     email: "",
-// //     subject: "",
-// //     message: "",
-// //   });
-// //   const [submitStatus, setSubmitStatus] = useState(null);
-// //   const [isProcessing, setIsProcessing] = useState(false); // For showing the processing effect
-
-// //   const handleChange = (e) => {
-// //     setFormData({ ...formData, [e.target.name]: e.target.value });
-// //   };
-
-// //   const handleSubmit = async (e) => {
-// //     e.preventDefault();
-// //     setIsProcessing(true); // Start processing
-  
-// //     try {
-// //       const response = await axios.post(`${API_URL}/api/contact`, formData, {
-// //         headers: {
-// //           "Content-Type": "application/json",
-// //         },
-// //       });
-  
-// //       if (response.status === 200) {
-// //         setSubmitStatus("success");
-// //         setFormData({ name: "", email: "", subject: "", message: "" });
-// //       } else {
-// //         setSubmitStatus("error");
-// //       }
-// //     } catch (error) {
-// //       console.error("Error:", error);
-// //       setSubmitStatus("error");
-// //     } finally {
-// //       setIsProcessing(false); // Stop processing after the response
-// //     }
-// //   };
-
-// //   return (
-// //     <div style={{ width: "100%", backgroundColor: "black", color: "#F0F4F8" }}> {/* Black background with light text */}
-// //       <Navbar />
-// //       <div
-// //         style={{
-// //           fontFamily: "Arial, sans-serif",
-// //           maxWidth: "1200px",
-// //           margin: "0 auto",
-// //           padding: "40px 20px",
-// //         }}
-// //       >
-// //         <h1
-// //           style={{
-// //             fontSize: "36px",
-// //             fontWeight: "bold",
-// //             textAlign: "center",
-// //             marginBottom: "40px",
-// //             color: "#8A2BE2", // Lighter blue for the heading
-// //           }}
-// //         >
-// //           Contact Us
-// //         </h1>
-
-// //         <div
-// //           style={{
-// //             display: "flex",
-// //             flexDirection: "column",
-// //             gap: "40px",
-// //             "@media (min-width: 768px)": {
-// //               flexDirection: "row",
-// //             },
-// //           }}
-// //         >
-// //           <div
-// //             style={{
-// //               flex: "1",
-// //               "@media (min-width: 768px)": {
-// //                 marginRight: "40px",
-// //               },
-// //             }}
-// //           >
-// //             <h2
-// //               style={{
-// //                 fontSize: "20px",
-// //                 fontWeight: "bold",
-// //                 marginBottom: "20px",
-// //                 color: "#0000FF", // Lighter blue for sub-heading
-// //               }}
-// //             >
-// //               Get in Touch
-// //             </h2>
-
-// //             <form
-// //               onSubmit={handleSubmit}
-// //               style={{
-// //                 display: "flex",
-// //                 flexDirection: "column",
-// //                 gap: "16px",
-// //               }}
-// //             >
-// //               <div>
-// //                 <label
-// //                   htmlFor="name"
-// //                   style={{
-// //                     display: "block",
-// //                     marginBottom: "5px",
-// //                     fontWeight: "bold",
-// //                     color: "#F0F4F8", // Light text color
-// //                   }}
-// //                 >
-// //                   Name:
-// //                 </label>
-// //                 <input
-// //                   type="text"
-// //                   id="name"
-// //                   name="name"
-// //                   value={formData.name}
-// //                   onChange={handleChange}
-// //                   required
-// //                   style={{
-// //                     width: "100%",
-// //                     padding: "10px",
-// //                     fontSize: "16px",
-// //                     border: "0.05px solid black",
-// //                     borderRadius: "10px",
-// //                     backgroundColor: "#191970",
-// //                     color: "#F0F4F8", // Light text inside the input
-// //                   }}
-// //                 />
-// //               </div>
-
-// //               <div>
-// //                 <label
-// //                   htmlFor="email"
-// //                   style={{
-// //                     display: "block",
-// //                     marginBottom: "5px",
-// //                     fontWeight: "bold",
-// //                     color: "#F0F4F8",
-// //                   }}
-// //                 >
-// //                   Email:
-// //                 </label>
-// //                 <input
-// //                   type="email"
-// //                   id="email"
-// //                   name="email"
-// //                   value={formData.email}
-// //                   onChange={handleChange}
-// //                   required
-// //                   style={{
-// //                     width: "100%",
-// //                     padding: "10px",
-// //                     fontSize: "16px",
-// //                     border: "0.05px solid black",
-// //                     borderRadius: "10px",
-// //                     backgroundColor: "#191970",
-// //                     color: "#F0F4F8",
-// //                   }}
-// //                 />
-// //               </div>
-
-// //               <div>
-// //                 <label
-// //                   htmlFor="subject"
-// //                   style={{
-// //                     display: "block",
-// //                     marginBottom: "5px",
-// //                     fontWeight: "bold",
-// //                     color: "#F0F4F8",
-// //                   }}
-// //                 >
-// //                   Subject:
-// //                 </label>
-// //                 <input
-// //                   type="text"
-// //                   id="subject"
-// //                   name="subject"
-// //                   value={formData.subject}
-// //                   onChange={handleChange}
-// //                   required
-// //                   style={{
-// //                     width: "100%",
-// //                     padding: "10px",
-// //                     fontSize: "16px",
-// //                     border: "0.05px solid black",
-// //                     borderRadius: "10px",
-// //                     backgroundColor: "#191970",
-// //                     color: "#F0F4F8",
-// //                   }}
-// //                 />
-// //               </div>
-
-// //               <div>
-// //                 <label
-// //                   htmlFor="message"
-// //                   style={{
-// //                     display: "block",
-// //                     marginBottom: "5px",
-// //                     fontWeight: "bold",
-// //                     color: "#F0F4F8",
-// //                   }}
-// //                 >
-// //                   Message:
-// //                 </label>
-// //                 <textarea
-// //                   id="message"
-// //                   name="message"
-// //                   value={formData.message}
-// //                   onChange={handleChange}
-// //                   required
-// //                   style={{
-// //                     width: "100%",
-// //                     padding: "10px",
-// //                     fontSize: "16px",
-// //                     border: "0.05px solid black",
-// //                     borderRadius: "10px",
-// //                     backgroundColor: "#191970",
-// //                     color: "#F0F4F8",
-// //                     minHeight: "150px",
-// //                     resize: "vertical",
-// //                   }}
-// //                 ></textarea>
-// //               </div>
-
-// //               <button
-// //                 type="submit"
-// //                 style={{
-// //                   backgroundColor: isProcessing ? "#8a2be2" : "#0000FF", // Change color if processing
-// //                   color: "white",
-// //                   padding: "12px 24px",
-// //                   fontSize: "16px",
-// //                   fontWeight: "bold",
-// //                   border: "none",
-// //                   width: '50%',
-// //                   borderRadius: "4px",
-// //                   cursor: isProcessing ? "not-allowed" : "pointer", // Disable button if processing
-// //                   transition: "background-color 0.3s ease",
-// //                   ":hover": {
-// //                     backgroundColor: isProcessing ? "#8a2be2" : "#0000FF",
-// //                   },
-// //                 }}
-// //                 disabled={isProcessing} // Disable button while processing
-// //               >
-// //                 {isProcessing ? "Sending..." : "Send Message"}
-// //               </button>
-// //             </form>
-
-// //             {submitStatus === "success" && (
-// //               <p
-// //                 style={{
-// //                   color: "green",
-// //                   marginTop: "20px",
-// //                   fontWeight: "bold",
-// //                 }}
-// //               >
-// //                 Message sent successfully!
-// //               </p>
-// //             )}
-
-// //             {submitStatus === "error" && (
-// //               <p
-// //                 style={{
-// //                   color: "red",
-// //                   marginTop: "20px",
-// //                   fontWeight: "bold",
-// //                 }}
-// //               >
-// //                 There was an error sending your message. Please try again.
-// //               </p>
-// //             )}
-// //           </div>
-
-// //           <div style={{ flex: "1" }}>
-// //             {/* Contact information */}
-// //             <h2
-// //               style={{
-// //                 fontSize: "16px",
-// //                 fontWeight: "bold",
-// //                 marginBottom: "20px",
-// //                 color: "#0000FF",
-// //               }}
-// //             >
-// //               Contact Information
-// //             </h2>
-
-// //             <div
-// //               style={{
-// //                 display: "flex",
-// //                 flexDirection: "column",
-// //                 gap: "20px",
-// //               }}
-// //             >
-// //               <div
-// //                 style={{
-// //                   display: "flex",
-// //                   alignItems: "center",
-// //                   gap: "10px",
-// //                 }}
-// //               >
-// //                 <MapPin size={24} color="#0000FF" />
-// //                 <div>
-                
-// //                   <p style={{ color: "#0000FF" }}>Lagos, Nigeria</p>
-// //                 </div>
-// //               </div>
-
-// //               <div
-// //                 style={{
-// //                   display: "flex",
-// //                   alignItems: "center",
-// //                   gap: "10px",
-// //                 }}
-// //               >
-// //                 <Phone size={24} color="#0000FF" />
-// //                 <div>
-                  
-// //                   <p style={{ color: "#0000FF" }}>+234 champion</p>
-// //                 </div>
-// //               </div>
-
-// //               <div
-// //                 style={{
-// //                   display: "flex",
-// //                   alignItems: "center",
-// //                   gap: "10px",
-// //                 }}
-// //               >
-// //                 <Mail size={24} color="#0000FF" />
-// //                 <div>
-                 
-// //                 <p style={{ color: "#0000FF" }}>championaden.ca@gmail.com</p>
-// //                 </div>
-// //               </div>
-
-// //               <div
-// //                 style={{
-// //                   display: "flex",
-// //                   alignItems: "center",
-// //                   gap: "10px",
-// //                 }}
-// //               >
-// //                 <Clock size={24} color="#0000FF" />
-// //                 <div>
-              
-// //                   <p style={{ color: "#0000FF" }}>Open to work</p>
-// //                 </div>
-// //               </div>
-// //             </div>
-// //           </div>
-// //         </div>
-// //       </div>
-// //       <Footer />
-// //     </div>
-// //   );
-// // }

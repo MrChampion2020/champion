@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaGlobe, FaFacebook, FaYoutube, FaInstagram, FaTwitter, FaArrowUp } from 'react-icons/fa';
 import { useMediaQuery } from 'react-responsive';
+import { ThemeContext } from '../screens/context/ThemeContext';
 import logo from "../assets/logo.png"
 
 // Content Constants
@@ -59,6 +60,7 @@ const iconVariants = {
 
 // Footer Component
 const Footer = ({ navigation }) => {
+  const { theme } = useContext(ThemeContext);
   const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
   const isTablet = useMediaQuery({ query: '(max-width: 1024px)' });
 
@@ -68,7 +70,11 @@ const Footer = ({ navigation }) => {
 
   return (
     <motion.footer
-      className="relative bg-gradient-to-b from-gray-900 to-blue-950 text-white overflow-hidden"
+      className={`relative ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-b from-gray-900 to-blue-950 text-white' 
+          : 'bg-gradient-to-b from-gray-100 to-blue-100 text-gray-900'
+      } overflow-hidden`}
       initial="hidden"
       whileInView="visible"
       variants={containerVariants}
@@ -77,12 +83,18 @@ const Footer = ({ navigation }) => {
       <style>
         {`
           .glassmorphism {
-            background: rgba(255, 255, 255, 0.05);
+            background: ${theme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.05)' 
+              : 'rgba(0, 0, 0, 0.05)'};
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid ${theme === 'dark' 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(0, 0, 0, 0.1)'};
           }
           .glow-hover:hover {
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 15px ${theme === 'dark' 
+              ? 'rgba(59, 130, 246, 0.5)' 
+              : 'rgba(59, 130, 246, 0.3)'};
           }
           .particle-bg {
             position: absolute;
@@ -90,8 +102,8 @@ const Footer = ({ navigation }) => {
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('../assets/blue.jpg";') repeat;
-            opacity: 0.1;
+            background: url('../assets/blue.jpg') repeat;
+            opacity: ${theme === 'dark' ? '0.1' : '0.05'};
             animation: particles 20s linear infinite;
           }
           @keyframes particles {
@@ -114,47 +126,43 @@ const Footer = ({ navigation }) => {
           >
             <motion.a
               href={CONTENT.logo.href}
-              className="text-3xl font-bold text-blue-400 glow-hover w-[30px] rounded-sm "
+              className={`text-3xl font-bold ${
+                theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+              } glow-hover w-[30px] rounded-sm `}
               onClick={() => navigation('/')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-
             >
-               <motion.div
-            className="flex items-center rounded-full"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-           
+              <motion.div
+                className="flex items-center rounded-full"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <img src={logo} alt="Logo" className="h-8 w-8 rounded-full" />
-                {/* <motion.span
-                  className="ml-2 text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  CA
-                </motion.span> */}
-             
-          </motion.div>
-
+              </motion.div>
             </motion.a>
-            <p className="text-lg font-semibold text-gray-200">{CONTENT.logo.name}</p>
+            <p className={`text-lg font-semibold ${
+              theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+            }`}>{CONTENT.logo.name}</p>
           </motion.div>
 
           {/* Column 2: Useful Links */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col gap-4 glassmorphism p-6 rounded-lg"
+            className="flex flex-col gap-4 glassmorphism p-6 rounded-6"
           >
-            <h2 className="text-xl font-bold text-blue-400 border-b border-blue-500 pb-2">
+            <h2 className={`text-xl font-bold ${
+              theme === 'dark' ? 'text-blue-400 border-b border-blue-500' : 'text-blue-600 border-b border-blue-300'
+            } pb-2`}>
               {CONTENT.links.title}
             </h2>
             {CONTENT.links.items.map((link, index) => (
               <motion.a
                 key={index}
                 href={link.href}
-                className="text-gray-200 hover:text-blue-400 transition"
+                className={`${
+                  theme === 'dark' ? 'text-gray-200 hover:text-blue-400' : 'text-gray-800 hover:text-blue-600'
+                } transition`}
                 variants={itemVariants}
                 whileHover={{ x: 5 }}
               >
@@ -168,19 +176,23 @@ const Footer = ({ navigation }) => {
             variants={itemVariants}
             className="flex flex-col gap-4 glassmorphism p-6 rounded-lg"
           >
-            <h2 className="text-xl font-bold text-blue-400 border-b border-blue-500 pb-2">
+            <h2 className={`text-xl font-bold ${
+              theme === 'dark' ? 'text-blue-400 border-b border-blue-500' : 'text-blue-600 border-b border-blue-300'
+            } pb-2`}>
               {CONTENT.contact.title}
             </h2>
             {CONTENT.contact.items.map((item, index) => (
               <motion.a
                 key={index}
                 href={item.href}
-                className="flex items-center gap-3 text-gray-200 hover:text-blue-400 transition"
+                className={`flex items-center gap-3 ${
+                  theme === 'dark' ? 'text-gray-200 hover:text-blue-400' : 'text-gray-800 hover:text-blue-600'
+                } transition`}
                 variants={itemVariants}
                 whileHover={{ x: 5 }}
                 aria-label={item.label}
               >
-                <item.icon className="text-blue-400" size={18} />
+                <item.icon className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} size={18} />
                 <span>{item.value}</span>
               </motion.a>
             ))}
@@ -191,7 +203,9 @@ const Footer = ({ navigation }) => {
         <motion.div
           className={`flex ${
             isMobile ? 'flex-col' : 'flex-row'
-          } justify-between items-center mt-12 border-t border-gray-700 pt-6 gap-6`}
+          } justify-between items-center mt-12 border-t ${
+            theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
+          } pt-6 gap-6`}
           variants={itemVariants}
         >
           <div className="flex gap-4">
@@ -199,7 +213,11 @@ const Footer = ({ navigation }) => {
               <motion.a
                 key={index}
                 href={social.href}
-                className="text-gray-200 hover:text-blue-400 p-2 rounded-full bg-gray-800/50 glow-hover"
+                className={`${
+                  theme === 'dark' 
+                    ? 'text-gray-200 hover:text-blue-400 bg-gray-800/50' 
+                    : 'text-gray-800 hover:text-blue-600 bg-gray-200/50'
+                } p-2 rounded-full glow-hover`}
                 variants={iconVariants}
                 whileHover="hover"
                 whileTap="tap"
@@ -209,13 +227,19 @@ const Footer = ({ navigation }) => {
               </motion.a>
             ))}
           </div>
-          <p className="text-sm text-gray-400">{CONTENT.copyright}</p>
+          <p className={`text-sm ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+          }`}>{CONTENT.copyright}</p>
         </motion.div>
 
         {/* Back to Top Button */}
         <motion.button
           onClick={handleBackToTop}
-          className="fixed bottom-8 right-8 p-3 bg-blue-500 text-white rounded-full glow-hover"
+          className={`fixed bottom-8 right-8 p-3 ${
+            theme === 'dark' 
+              ? 'bg-blue-500 text-white' 
+              : 'bg-blue-600 text-white'
+          } rounded-full glow-hover`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           aria-label="Back to top"
@@ -229,258 +253,3 @@ const Footer = ({ navigation }) => {
 
 export default Footer;
 
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import { 
-//   FaMapMarkerAlt, 
-//   FaPhoneAlt, 
-//   FaEnvelope, 
-//   FaGlobe, 
-//   FaFacebook, 
-//   FaYoutube, 
-//   FaInstagram, 
-//   FaTwitter 
-// } from 'react-icons/fa';
-// import blue from "../assets/blue.jpg";
-// import { useMediaQuery } from "react-responsive";
-
-
-// const Footer = ({ navigation }) => {
-//   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
-
-//   return (
-//     <div
-//       style={{
-//         position: "relative",
-//         backgroundImage: `url(${blue})`,
-//         backgroundSize: "cover",
-//         backgroundPosition: "center",
-//         backgroundAttachment: "fixed",
-//         height: isMobile ? "120vh" : "82vh", // Adjusted height for mobile view
-//         width: "90vw",
-//         padding: "20px",
-//         display: "flex",
-//         flexDirection: "column",
-//         justifyContent: "center",
-//         alignItems: "center",
-//         gap: 20
-//       }}
-//     >
-//       <div
-//         style={{
-//           padding: "0px 15px",
-//           color: "white",
-//           display: "flex",
-//           flexDirection: isMobile ? "column" : "row",
-//           margin: "auto",
-//           gap: "10px",
-//           width: "100%",
-//         }}
-//       >
-
-//         {/* Column 1: Logo and Organization Name */}
-//         <div
-//           style={{
-//             flex: "0 0 30%",
-//             textAlign: "left",
-//             padding: "10px",
-//             display: "flex",
-//             flexDirection: "column",
-//             gap: "10px",
-//             width: isMobile ? "100%" : "30%",
-//           }}
-//         >
-//           <a href="/" style={{ textDecoration: "none", color: 'white', fontWeight: 900 }}
-//             onClick={() => navigation("/")}
-//           >
-//             CA
-        
-//           </a>
-//           <p style={{ fontSize: "16px", fontWeight: "bold" }}>
-//             Champion Aden 
-//           </p>
-//         </div>
-
-//         {/* Column 2: Useful Links */}
-//         <div
-//           style={{
-//             flex: "0 0 30%",
-//             textAlign: "left",
-//             padding: "10px",
-//             display: "flex",
-//             flexDirection: "column",
-//             gap: "15px",
-//             width: isMobile ? "100%" : "30%",
-//           }}
-//         >
-//           <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>
-//             <b
-//               style={{
-//                 paddingBottom: "8px",
-//                 borderBottom: "0.5px solid #0000FF", // Customized border-bottom color
-//                 background: "linear-gradient(to right, transparent 50%, transparent 50%)",
-//                 backgroundPosition: "0 100%",
-//                 backgroundRepeat: "no-repeat",
-//                 backgroundSize: "80% 1px",
-//               }}
-//             >
-//               Useful
-//             </b>
-//             <b> Links</b>
-//           </h2>
-//           <a href="/projects" style={{ textDecoration: "none", color: "white" }}>
-//             Projects
-//           </a>
-//           <a href="/about" style={{ textDecoration: "none", color: "white" }}>
-//             About Me
-//           </a>
-//           <a href="/contact" style={{ textDecoration: "none", color: "white" }}>
-//             Contact
-//           </a>
-//           <a href="/portfolio" style={{ textDecoration: "none", color: "white" }}>
-//             Portfolio
-//           </a>
-//           <a href="/blog" style={{ textDecoration: "none", color: "white" }}>
-//             Blog
-//           </a>
-//         </div>
-
-//         {/* Column 3: Contact Information */}
-//         <div
-//           style={{
-//             flex: "0 0 30%",
-//             textAlign: "left",
-//             padding: "10px",
-//             display: "flex",
-//             flexDirection: "column",
-//             gap: "15px",
-//             width: isMobile ? "100%" : "30%",
-//           }}
-//         >
-//           <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>
-//             <b
-//               style={{
-//                 paddingBottom: "8px",
-//                 borderBottom: "0.5px solid #0000FF", // Customized border-bottom color
-//                 background: "linear-gradient(to right, transparent 50%, transparent 50%)",
-//                 backgroundPosition: "0 100%",
-//                 backgroundRepeat: "no-repeat",
-//                 backgroundSize: "80% 1px",
-//               }}
-//             >
-//               Contact
-//             </b>
-//             <b> Information</b>
-//           </h2>
-//           <a
-//             style={{
-//               textDecoration: "none",
-//               display: "flex",
-//               alignItems: "center",
-//               gap: "10px",
-//               color: "white",
-//               fontSize: "16px",
-//             }}
-//           >
-//             <FaMapMarkerAlt style={{ fontSize: "18px" }} />
-//             Lagos, Nigeria
-//           </a>
-//           <a
-//             href="tel:+234000000000"
-//             style={{
-//               textDecoration: "none",
-//               display: "flex",
-//               alignItems: "center",
-//               gap: "10px",
-//               color: "white",
-//               fontSize: "16px",
-//             }}
-//           >
-//             <FaPhoneAlt style={{ fontSize: "18px" }} />
-//             +234 champion
-//           </a>
-//           <a
-//             href="mailto:info@ceibz1.com"
-//             style={{
-//               textDecoration: "none",
-//               display: "flex",
-//               alignItems: "center",
-//               gap: "10px",
-//               color: "white",
-//               fontSize: "16px",
-//             }}
-//           >
-//             <FaEnvelope style={{ fontSize: "18px" }} />
-//             championaden.ca@gmail.com
-//           </a>
-//           <a
-//             href="https://www.championaden.online"
-//             style={{
-//               textDecoration: "none",
-//               display: "flex",
-//               alignItems: "center",
-//               gap: "10px",
-//               color: "white",
-//               fontSize: "16px",
-//             }}
-//           >
-//             <FaGlobe style={{ fontSize: "18px" }} />
-//             www.championaden.online
-//           </a>
-//         </div>
-//       </div>
-
-//       {/* Footer */}
-//       <footer
-//         style={{
-//           display: "flex",
-//           flexDirection: isMobile ? "column" : "row",
-//           justifyContent: "center",
-//           marginTop: isMobile ? "70px" : "0px",
-//           color: "white",
-//           width: "100%",
-//           gap: "20px",
-//           marginBottom: 20
-
-//         }}
-//       >
-//         {/* Social Media Links */}
-//         <div
-//           style={{
-//             display: "flex",
-//             flexDirection: "row",
-//             gap: "20px",
-//             justifyContent: "center",
-//             margin: "auto",
-//           }}
-//         >
-//           <a href="https://www.facebook.com/championaden" style={{ textDecoration: "none" }}>
-//             <FaFacebook size={24} />
-//           </a>
-//           <a href="https://instagram.com/sirchampio_n" style={{ textDecoration: "none" }}>
-//             <FaInstagram size={24} />
-//           </a>
-//           <a href="https://x.com/sirchampionad" style={{ textDecoration: "none" }}>
-//             <FaTwitter size={24} />
-//           </a>
-//         </div>
-
-//         {/* Copyright */}
-//         <div
-//           style={{
-//             textAlign: "center",
-//             margin: "auto",
-//           }}
-//         >
-//           <p style={{ fontSize: "14px" }}>
-//             &copy; {new Date().getFullYear()} Champion Aden | All rights reserved
-//           </p>
-//         </div>
-//       </footer>
-//     </div>
-//   );
-// };
-
-// export default Footer;
