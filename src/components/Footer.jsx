@@ -32,7 +32,7 @@ const CONTENT = {
     ],
   },
   socials: [
-    { icon: FaFacebook, href: 'https://www.facebook.com/championaden', label: 'Facebook' },
+    // { icon: FaFacebook, href: 'https://www.facebook.com/championaden', label: 'Facebook' },
     { icon: FaInstagram, href: 'https://instagram.com/sirchampio_n', label: 'Instagram' },
     { icon: FaTwitter, href: 'https://x.com/sirchampionad', label: 'Twitter' },
   ],

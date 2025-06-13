@@ -23,12 +23,12 @@ import { ThemeContext } from "../../screens/context/ThemeContext";
 
 // Navigation Items
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Projects", href: "#projects" },
-  { label: "Portfolio", href: "#portfolio" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "about" },
+  { label: "Projects", href: "projects" },
+  { label: "Portfolio", href: "portfolio" },
+  { label: "Testimonials", href: "testimonials" },
+  { label: "Contact", href: "contact" },
 ];
 
 // Content Constants
@@ -41,11 +41,11 @@ const CONTENT = {
     downloadCV: "Download CV",
   },
   about: {
-    "title": "About Me",
-  "intro": "Hi, I'm Champion Aden — a passionate Full Stack Developer and Cybersecurity Analyst with a deep commitment to building secure, high-performing digital experiences across web and mobile platforms.",
-  "description1": "With over 7 years of industry experience, I have cultivated deep expertise in designing and developing modern, scalable, and maintainable applications across both the front and back end. My technical foundation is built on JavaScript and TypeScript, with a focus on the MERN stack (MongoDB, Express.js, React.js, Node.js) and React Native for mobile solutions. My approach blends engineering precision with user-centered thinking to deliver solutions that are not only functional but also elegant and efficient.",
-  "description2": "I am well-versed in the complete software development lifecycle — from wireframing in Figma and architecting APIs, to deploying production-ready apps with robust security layers. I regularly implement secure authentication methods like JWT and OAuth2, optimize performance for web and mobile platforms, and integrate cloud services and third-party APIs. With additional fluency in PHP. I am driven by a deep love for clean code, meaningful impact, and continuous learning in a rapidly evolving tech ecosystem.",
- skills: [
+    title: "About Me",
+    intro: "Hi, I'm Champion Aden — a passionate Full Stack Developer and Cybersecurity Analyst with a deep commitment to building secure, high-performing digital experiences across web and mobile platforms.",
+    description1: "With over 7 years of industry experience, I have cultivated deep expertise in designing and developing modern, scalable, and maintainable applications across both the front and back end. My technical foundation is built on JavaScript and TypeScript, with a focus on the MERN stack (MongoDB, Express.js, React.js, Node.js) and React Native for mobile solutions. My approach blends engineering precision with user-centered thinking to deliver solutions that are not only functional but also elegant and efficient.",
+    description2: "I am well-versed in the complete software development lifecycle — from wireframing in Figma and architecting APIs, to deploying production-ready apps with robust security layers. I regularly implement secure authentication methods like JWT and OAuth2, optimize performance for web and mobile platforms, and integrate cloud services and third-party APIs. With additional fluency in PHP. I am driven by a deep love for clean code, meaningful impact, and continuous learning in a rapidly evolving tech ecosystem.",
+    skills: [
       "React",
       "Node.js",
       "MongoDB",
@@ -395,8 +395,18 @@ const Home = () => {
     subject: "",
     message: "",
   });
-  const [errors, setErrors] = useState({ name: [], email: [], subject: [], message: [] });
-  const [touched, setTouched] = useState({ name: false, email: false, subject: false, message: false });
+  const [errors, setErrors] = useState({
+    name: [],
+    email: [],
+    subject: [],
+    message: [],
+  });
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    subject: false,
+    message: false,
+  });
   const [submitStatus, setSubmitStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -404,28 +414,28 @@ const Home = () => {
     const errors = [];
 
     switch (name) {
-      case 'name':
-        if (!value) errors.push('Yo, put a name in there, dummy!');
-        if (value.length < 2) errors.push('Name’s too short, c’mon, give more!');
-        if (value.length > 50) errors.push('Whoa, name’s too long, chill out!');
-        if (!/^[a-zA-Z\s'-]+$/.test(value)) errors.push('No weird stuff in name, just letters and spaces, okay?');
+      case "name":
+        if (!value) errors.push("Yo, put a name in there, dummy!");
+        if (value.length < 2) errors.push("Name’s too short, c’mon, give more!");
+        if (value.length > 50) errors.push("Whoa, name’s too long, chill out!");
+        if (!/^[a-zA-Z\s'-]+$/.test(value)) errors.push("No weird stuff in name, just letters and spaces, okay?");
         break;
-      case 'email':
-        if (!value) errors.push('Oops, need an email, silly!');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push('That email looks funky, fix it!');
-        if (value.length > 100) errors.push('Email’s too big, shrink it down!');
-        if (!/\.[a-zA-Z]{2,}$/.test(value)) errors.push('Gimme a real email domain, dude!');
+      case "email":
+        if (!value) errors.push("Oops, need an email, silly!");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push("That email looks funky, fix it!");
+        if (value.length > 100) errors.push("Email’s too big, shrink it down!");
+        if (!/\.[a-zA-Z]{2,}$/.test(value)) errors.push("Gimme a real email domain, dude!");
         break;
-      case 'subject':
-        if (!value) errors.push('Hey, gimme a subject, don’t be lazy!');
-        if (value.length < 3) errors.push('Subject’s too tiny, make it bigger!');
-        if (value.length > 100) errors.push('Subject’s too huge, cut it down!');
+      case "subject":
+        if (!value) errors.push("Hey, gimme a subject, don’t be lazy!");
+        if (value.length < 3) errors.push("Subject’s too tiny, make it bigger!");
+        if (value.length > 100) errors.push("Subject’s too huge, cut it down!");
         break;
-      case 'message':
-        if (!value) errors.push('Write something, you goofball!');
-        if (value.length < 10) errors.push('Message’s too short, add more junk!');
-        if (value.length > 1000) errors.push('Whoa, message’s a novel, tone it down!');
-        if (value.split(/\s+/).length < 3) errors.push('Need more words, at least 3, lazybones!');
+      case "message":
+        if (!value) errors.push("Write something, you goofball!");
+        if (value.length < 10) errors.push("Message’s too short, add more junk!");
+        if (value.length > 1000) errors.push("Whoa, message’s a novel, tone it down!");
+        if (value.split(/\s+/).length < 3) errors.push("Need more words, at least 3, lazybones!");
         break;
       default:
         break;
@@ -435,16 +445,20 @@ const Home = () => {
   };
 
   const validateForm = () => {
-    const errors = {};
+    const newErrors = {
+      name: [],
+      email: [],
+      subject: [],
+      message: [],
+    };
     let isValid = true;
 
     Object.keys(formData).forEach((field) => {
-      const fieldErrors = validateField(field, formData[field]);
-      errors[field] = fieldErrors;
-      if (fieldErrors.length > 0) isValid = false;
+      newErrors[field] = validateField(field, formData[field]);
+      if (newErrors[field].length > 0) isValid = false;
     });
 
-    setErrors(errors);
+    setErrors(newErrors);
     return isValid;
   };
 
@@ -465,7 +479,7 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched
     setTouched({ name: true, email: true, subject: true, message: true });
 
@@ -477,11 +491,13 @@ const Home = () => {
     try {
       const response = await axios.post(`${API_URL}/api/contact`, formData, {
         headers: { "Content-Type": "application/json" },
+        timeout: 10000, // 10-second timeout
       });
       if (response.status === 200) {
         setSubmitStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
-        setErrors({});
+        setErrors({ name: [], email: [], subject: [], message: [] });
+        setTouched({ name: false, email: false, subject: false, message: false });
       } else {
         setSubmitStatus("error");
       }
@@ -494,18 +510,18 @@ const Home = () => {
   };
 
   const getInputStatus = (field) => {
-    if (!touched || !touched[field]) return 'neutral';
-    return errors[field]?.length === 0 && formData[field] ? 'success' : 'error';
+    if (!touched[field]) return "neutral";
+    return errors[field].length === 0 && formData[field] ? "success" : "error";
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} text-${theme === 'dark' ? 'white' : 'gray-900'} font-sans overflow-x-hidden`}>
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-white"} text-${theme === "dark" ? "white" : "gray-900"} font-sans overflow-x-hidden`}>
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
           body { font-family: 'Inter', sans-serif; }
           .tech-outline {
-            text-shadow: 0 0 5px rgba(59, 130, 246, ${theme === 'dark' ? 0.8 : 0.5}), 0 0 10px rgba(147, 51, 234, ${theme === 'dark' ? 0.5 : 0.3});
+            text-shadow: 0 0 5px rgba(59, 130, 246, ${theme === "dark" ? 0.8 : 0.5}), 0 0 10px rgba(147, 51, 234, ${theme === "dark" ? 0.5 : 0.3});
             font-weight: 800;
           }
           .about-underline::after {
@@ -565,8 +581,8 @@ const Home = () => {
             100% { clip: rect(0, 900px, 0, 0); }
           }
           .portfolio-3d {
-            text-shadow: 0 4px 8px rgba(0, 0, 0, ${theme === 'dark' ? 0.3 : 0.1}), 0 2px 4px rgba(59, 130, 246, ${theme === 'dark' ? 0.5 : 0.3});
-            background: rgba(${theme === 'dark' ? 255 : 0}, ${theme === 'dark' ? 255 : 0}, ${theme === 'dark' ? 255 : 0}, ${theme === 'dark' ? 0.05 : 0.1});
+            text-shadow: 0 4px 8px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1}), 0 2px 4px rgba(59, 130, 246, ${theme === "dark" ? 0.5 : 0.3});
+            background: rgba(${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 0.05 : 0.1});
             backdrop-filter: blur(10px);
             padding: 8px 16px;
             border-radius: 8px;
@@ -574,7 +590,7 @@ const Home = () => {
             transition: transform 0.3s ease;
           }
           .testimonial-glow {
-            text-shadow: 0 0 10px rgba(59, 130, 246, ${theme === 'dark' ? 0.8 : 0.5});
+            text-shadow: 0 0 10px rgba(59, 130, 246, ${theme === "dark" ? 0.8 : 0.5});
             position: relative;
           }
           .particle-dots::before {
@@ -582,14 +598,14 @@ const Home = () => {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(59, 130, 246, ${theme === 'dark' ? 0.3 : 0.1}) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(59, 130, 246, ${theme === "dark" ? 0.3 : 0.1}) 1px, transparent 1px);
             background-size: 10px 10px;
-            opacity: ${theme === 'dark' ? 0.5 : 0.3};
+            opacity: ${theme === "dark" ? 0.5 : 0.3};
             animation: particles 5s linear infinite;
           }
           @keyframes particles {
-            0% { transform: translateY(0); opacity: ${theme === 'dark' ? 0.5 : 0.3}; }
-            100% { transform: translateY(-10px); opacity: ${theme === 'dark' ? 0.2 : 0.1}; }
+            0% { transform: translateY(0); opacity: ${theme === "dark" ? 0.5 : 0.3}; }
+            100% { transform: translateY(-10px); opacity: ${theme === "dark" ? 0.2 : 0.1}; }
           }
           .circuit-underline::after {
             content: '';
@@ -649,9 +665,9 @@ const Home = () => {
             display: inline-block;
           }
           .navbar-item:hover {
-            color: ${theme === 'dark' ? '#3b82f6' : '#9333ea'};
-            background: rgba(${theme === 'dark' ? '59, 130, 246' : '147, 51, 234'}, 0.1);
-            box-shadow: 0 0 15px rgba(${theme === 'dark' ? '59, 130, 246' : '147, 51, 234'}, 0.3);
+            color: ${theme === "dark" ? "#3b82f6" : "#9333ea"};
+            background: rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.1);
+            box-shadow: 0 0 15px rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.3);
             transform: translateY(-2px);
           }
           .navbar-item::after {
@@ -661,7 +677,7 @@ const Home = () => {
             left: 0;
             width: 0;
             height: 2px;
-            background: ${theme === 'dark' ? '#3b82f6' : '#9333ea'};
+            background: ${theme === "dark" ? "#3b82f6" : "#9333ea"};
             transition: width 0.3s ease;
           }
           .navbar-item:hover::after {
@@ -673,14 +689,14 @@ const Home = () => {
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.3}), rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.1}));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, ${theme === "dark" ? 0.7 : 0.3}), rgba(0, 0, 0, ${theme === "dark" ? 0.7 : 0.1}));
             overflow: hidden;
             z-index: 0;
           }
           .tech-wheel {
             position: absolute;
             border-radius: 50%;
-            border: 2px dashed ${theme === 'dark' ? '#3b82f6' : '#9333ea'};
+            border: 2px dashed ${theme === "dark" ? "#3b82f6" : "#9333ea"};
             animation: spin 15s linear infinite;
             opacity: 0.5;
             max-width: 100%;
@@ -713,7 +729,7 @@ const Home = () => {
             position: absolute;
             width: min(500px, 60vw);
             height: min(500px, 60vw);
-            background: radial-gradient(circle, rgba(${theme === 'dark' ? '59, 130, 246' : '147, 51, 234'}, 0.3), transparent);
+            background: radial-gradient(circle, rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.3), transparent);
             opacity: 0.4;
             animation: pulse 10s ease-in-out infinite;
             max-width: 100%;
@@ -775,10 +791,8 @@ const Home = () => {
       </style>
 
       {/* Hero Section */}
-      <Navbar navItems={navItems || []} />
-      <section
-        className={`py-20 lg:py-32 flex flex-col justify-center min-h-screen relative overflow-hidden`}
-      >
+      <Navbar navItems={navItems ?? []} />
+      <section className={`py-20 lg:py-32 flex flex-col justify-center min-h-screen relative overflow-hidden`}>
         <div className="hero-background">
           <div className="tech-wheel"></div>
           <div className="tech-wheel"></div>
@@ -803,27 +817,36 @@ const Home = () => {
                 <span className="block text-blue-200">
                   <TypewriterText text={CONTENT.hero.greeting} delay={100} />
                 </span>
-                <span className={`block ${theme === 'dark' ? 'text-black' : 'text-gray-900'}`}>
+                <span className={`block ${theme === "dark" ? "text-black" : "text-white"}`}>
                   <TypewriterText text={CONTENT.hero.name} delay={100} />
                 </span>
               </motion.h1>
               <motion.p
                 variants={itemVariants}
-                className={`${isMobile ? "text-base" : "text-xl"} max-w-3xl ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+                className={`${isMobile ? "text-base" : "text-xl"} max-w-3xl ${theme === "dark" ? "text-gray-200" : "text-black"}`}
+                style={{ fontWeight: 600 }}
               >
                 {CONTENT.hero.description}
               </motion.p>
               <motion.div variants={itemVariants} className="flex space-x-6">
-                <motion.a href="#" whileHover={{ scale: 1.2 }} className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}>
+                <motion.a
+                  href="https://www.instagram.com/sirchampio_n/"
+                  whileHover={{ scale: 1.2 }}
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
+                >
                   <Instagram className="h-6 w-6" />
                 </motion.a>
-                <motion.a href="#" whileHover={{ scale: 1.2 }} className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}>
+                <motion.a
+                  href="https://www.linkedin.com/in/sirchampion/"
+                  whileHover={{ scale: 1.2 }}
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
+                >
                   <Linkedin className="h-6 w-6" />
                 </motion.a>
                 <motion.a
                   href="https://github.com/MrChampion2020"
                   whileHover={{ scale: 1.2 }}
-                  className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
                 >
                   <Github className="h-6 w-6" />
                 </motion.a>
@@ -833,8 +856,8 @@ const Home = () => {
                 className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
               >
                 <motion.a
-                  href="#contact"
-                  className={`px-6 py-3 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gradient-to-r from-purple-500 to-blue-600'} text-white font-medium rounded-full hover:${theme === 'dark' ? 'from-blue-600 hover:to-purple-700' : 'from-purple-600 hover:to-blue-700'} transition`}
+                  href="contact"
+                  className={`px-6 py-3 ${theme === "dark" ? "bg-gradient-to-r from-blue-500 to-purple-600" : "bg-gradient-to-r from-purple-500 to-blue-600"} text-white font-medium rounded-full hover:${theme === "dark" ? "from-blue-600 hover:to-purple-700" : "from-purple-600 hover:to-blue-700"} transition`}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
@@ -844,7 +867,7 @@ const Home = () => {
                 </motion.a>
                 <motion.a
                   href="/cv"
-                  className={`px-6 py-3 border ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-400 text-gray-800'} font-medium rounded-full hover:${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} transition`}
+                  className={`px-6 py-3 border ${theme === "dark" ? "border-gray-600 text-gray-200" : "border-gray-400 text-gray-800"} font-medium rounded-full hover:${theme === "dark" ? "bg-gray-800" : "bg-gray-200"} transition`}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
@@ -865,7 +888,7 @@ const Home = () => {
                 src={me}
                 alt="Champion Aden"
                 className="w-64 h-64 rounded-full shadow-lg object-cover relative z-50 mt-10 lg:mt-0 lg:ml-10"
-                style={{ transform: `translateY(${parallaxY.get()}px)`, border: `2px solid ${theme === 'dark' ? 'grey' : '#d1d5db'}`, borderRadius: "50%", maxWidth: "100%" }}
+                style={{ transform: `translateY(${parallaxY.get()}px)`, border: `2px solid ${theme === "dark" ? "grey" : "#d1d5db"}`, borderRadius: "50%", maxWidth: "100%" }}
               />
             </motion.div>
           </div>
@@ -874,7 +897,7 @@ const Home = () => {
       </section>
 
       {/* About Me Section */}
-      <section id="about" className={`py-20 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100/50'} backdrop-blur-sm`}>
+      <section id="about" className={`py-20 ${theme === "dark" ? "bg-gray-800/50" : "bg-gray-100/50"} backdrop-blur-sm`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
@@ -888,22 +911,22 @@ const Home = () => {
               <img
                 src={me2}
                 alt="About Champion Aden"
-                className={`w-full h-[100%] rounded-lg shadow-lg object-cover backdrop-blur-sm ${theme === 'dark' ? 'bg-gray-700/30' : 'bg-gray-200/30'}`}
+                className={`w-full h-[100%] rounded-lg shadow-lg object-cover backdrop-blur-sm ${theme === "dark" ? "bg-gray-700/30" : "bg-gray-200/30"}`}
               />
             </motion.div>
             <motion.div variants={itemVariants} className="space-y-6">
-              <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'} ${isMobile ? "text-base" : "text-lg"}`}>
+              <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
                 {CONTENT.about.description1}
               </p>
-              <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'} ${isMobile ? "text-base" : "text-lg"}`}>
+              <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
                 {CONTENT.about.description2}
               </p>
               <div className="flex flex-wrap gap-4">
-                {CONTENT.about.skills.map((skill) => (
+                {(CONTENT.about.skills ?? []).map((skill) => (
                   <motion.span
                     key={skill}
-                    className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-700/30 text-gray-200' : 'bg-gray-200/30 text-gray-800'} backdrop-blur-sm rounded-full text-sm font-medium`}
-                    whileHover={{ scale: 1.1, backgroundColor: theme === 'dark' ? '#1E40AF' : '#9333EA' }}
+                    className={`px-4 py-2 ${theme === "dark" ? "bg-gray-700/30 text-gray-200" : "bg-gray-200/30 text-gray-800"} backdrop-blur-sm rounded-full text-sm font-medium`}
+                    whileHover={{ scale: 1.1, backgroundColor: theme === "dark" ? "#1E40AF" : "#9333EA" }}
                   >
                     {skill}
                   </motion.span>
@@ -915,7 +938,7 @@ const Home = () => {
       </section>
 
       {/* Projects Section */}
-      <section id="projects" className={`py-20 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <section id="projects" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
@@ -925,12 +948,12 @@ const Home = () => {
         >
           <ProjectsHeading text={CONTENT.projects.title} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CONTENT.projects.items.map((project, index) => (
+            {(CONTENT.projects.items ?? []).map((project, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className={`bg-${theme === 'dark' ? 'gray-800/30' : 'gray-200/30'} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === 'dark' ? 0.3 : 0.1})` }}
+                className={`bg-${theme === "dark" ? "gray-800/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
+                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <motion.img
                   src={project.image}
@@ -940,11 +963,11 @@ const Home = () => {
                   whileHover="hover"
                 />
                 <div className="p-6">
-                  <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>{project.title}</h3>
-                  <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'} mb-4`}>{project.description}</p>
+                  <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>{project.title}</h3>
+                  <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>{project.description}</p>
                   <motion.a
                     href={project.link}
-                    className={`text-${theme === 'dark' ? 'blue-400' : 'purple-600'} hover:text-${theme === 'dark' ? 'purple-400' : 'blue-600'} font-medium`}
+                    className={`text-${theme === "dark" ? "blue-400" : "purple-600"} hover:text-${theme === "dark" ? "purple-400" : "blue-600"} font-medium`}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ x: 5 }}
@@ -959,7 +982,7 @@ const Home = () => {
       </section>
 
       {/* Portfolio Section */}
-      <section id="portfolio" className={`py-20 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100/50'} backdrop-blur-sm`}>
+      <section id="portfolio" className={`py-20 ${theme === "dark" ? "bg-gray-800/50" : "bg-gray-100/50"} backdrop-blur-sm`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
@@ -969,12 +992,12 @@ const Home = () => {
         >
           <PortfolioHeading text={CONTENT.portfolio.title} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CONTENT.portfolio.items.map((item, index) => (
+            {(CONTENT.portfolio.items ?? []).map((item, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className={`bg-${theme === 'dark' ? 'gray-700/30' : 'gray-200/30'} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === 'dark' ? 0.3 : 0.1})` }}
+                className={`bg-${theme === "dark" ? "gray-700/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
+                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <motion.img
                   src={item.image}
@@ -984,11 +1007,11 @@ const Home = () => {
                   whileHover="hover"
                 />
                 <div className="p-6">
-                  <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>{item.title}</h3>
-                  <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'} mb-4`}>{item.description}</p>
+                  <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>{item.title}</h3>
+                  <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>{item.description}</p>
                   <motion.a
                     href={item.link}
-                    className={`text-${theme === 'dark' ? 'blue-400' : 'purple-600'} hover:text-${theme === 'dark' ? 'purple-400' : 'blue-600'} font-medium`}
+                    className={`text-${theme === "dark" ? "blue-400" : "purple-600"} hover:text-${theme === "dark" ? "purple-400" : "blue-600"} font-medium`}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ x: 5 }}
@@ -1003,7 +1026,7 @@ const Home = () => {
       </section>
 
       {/* Customer Remarks Section */}
-      <section id="testimonials" className={`py-20 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <section id="testimonials" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
@@ -1013,12 +1036,12 @@ const Home = () => {
         >
           <TestimonialsHeading text={CONTENT.testimonials.title} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CONTENT.testimonials.items.map((testimonial, index) => (
+            {(CONTENT.testimonials.items ?? []).map((testimonial, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className={`bg-${theme === 'dark' ? 'gray-800/30' : 'gray-200/30'} backdrop-blur-sm rounded-lg shadow-lg p-6 glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === 'dark' ? 0.3 : 0.1})` }}
+                className={`bg-${theme === "dark" ? "gray-800/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg p-6 glass-card`}
+                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <div className="flex items-center mb-4">
                   <img
@@ -1027,11 +1050,11 @@ const Home = () => {
                     className="w-12 h-12 rounded-full mr-4 object-cover"
                   />
                   <div>
-                    <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{testimonial.name}</h3>
-                    <p className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} text-sm`}>{testimonial.role}</p>
+                    <h3 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{testimonial.name}</h3>
+                    <p className={`text-${theme === "dark" ? "gray-400" : "gray-600"} text-sm`}>{testimonial.role}</p>
                   </div>
                 </div>
-                <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'} italic`}>"{testimonial.remark}"</p>
+                <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} italic`}>"{testimonial.remark}"</p>
               </motion.div>
             ))}
           </div>
@@ -1039,7 +1062,7 @@ const Home = () => {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className={`py-20 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <section id="contact" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
@@ -1051,144 +1074,82 @@ const Home = () => {
           <div className={`grid ${isTablet ? "grid-cols-1" : "grid-cols-2"} gap-12`}>
             <motion.div variants={itemVariants} className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                <div>
-                  <label htmlFor="name" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {CONTENT.contact.form.nameLabel}
-                  </label>
-                  <motion.input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`mt-1 block w-full rounded-full border-${theme === 'dark' ? 'gray-600' : 'gray-400'} bg-${theme === 'dark' ? 'gray-800/30' : 'gray-100/30'} backdrop-blur-sm text-${theme === 'dark' ? 'white' : 'gray-900'} shadow-sm focus:border-${theme === 'dark' ? 'blue-500' : 'purple-600'} focus:ring-${theme === 'dark' ? 'blue-500' : 'purple-600'} p-3 ${
-                      getInputStatus('name') === 'error' ? 'input-error' :
-                      getInputStatus('name') === 'success' ? 'input-success' : ''
-                    }`}
-                    variants={itemVariants}
-                    whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === 'dark' ? 59 : 147}, ${theme === 'dark' ? 130 : 51}, ${theme === 'dark' ? 246 : 234}, 0.5)` }}
-                  />
-                  {errors.name.map((error, index) => (
-                    <motion.p
-                      key={index}
-                      variants={errorVariants}
-                      initial="hidden"
-                      animate={touched.name ? "visible" : "hidden"}
-                      className="text-red-400 text-sm mt-1"
+                {["name", "email", "subject", "message"].map((field) => (
+                  <div key={field}>
+                    <label
+                      htmlFor={field}
+                      className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
                     >
-                      {error}
-                    </motion.p>
-                  ))}
-                </div>
-                <div>
-                  <label htmlFor="email" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {CONTENT.contact.form.emailLabel}
-                  </label>
-                  <motion.input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`mt-1 block w-full rounded-full border-${theme === 'dark' ? 'gray-600' : 'gray-400'} bg-${theme === 'dark' ? 'gray-800/30' : 'gray-100/30'} backdrop-blur-sm text-${theme === 'dark' ? 'white' : 'gray-900'} shadow-sm focus:border-${theme === 'dark' ? 'blue-500' : 'purple-600'} focus:ring-${theme === 'dark' ? 'blue-500' : 'purple-600'} p-3 ${
-                      getInputStatus('email') === 'error' ? 'input-error' :
-                      getInputStatus('email') === 'success' ? 'input-success' : ''
-                    }`}
-                    variants={itemVariants}
-                    whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === 'dark' ? 59 : 147}, ${theme === 'dark' ? 130 : 51}, ${theme === 'dark' ? 246 : 234}, 0.5)` }}
-                  />
-                  {errors.email.map((error, index) => (
-                    <motion.p
-                      key={index}
-                      variants={errorVariants}
-                      initial="hidden"
-                      animate={touched.email ? "visible" : "hidden"}
-                      className="text-red-400 text-sm mt-1"
-                    >
-                      {error}
-                    </motion.p>
-                  ))}
-                </div>
-                <div>
-                  <label htmlFor="subject" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {CONTENT.contact.form.subjectLabel}
-                  </label>
-                  <motion.input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`mt-1 block w-full rounded-full border-${theme === 'dark' ? 'gray-600' : 'gray-400'} bg-${theme === 'dark' ? 'gray-800/30' : 'gray-100/30'} backdrop-blur-sm text-${theme === 'dark' ? 'white' : 'gray-900'} shadow-sm focus:border-${theme === 'dark' ? 'blue-500' : 'purple-600'} focus:ring-${theme === 'dark' ? 'blue-500' : 'purple-600'} p-3 ${
-                      getInputStatus('subject') === 'error' ? 'input-error' :
-                      getInputStatus('subject') === 'success' ? 'input-success' : ''
-                    }`}
-                    variants={itemVariants}
-                    whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === 'dark' ? 59 : 147}, ${theme === 'dark' ? 130 : 51}, ${theme === 'dark' ? 246 : 234}, 0.5)` }}
-                  />
-                  {errors.subject.map((error, index) => (
-                    <motion.p
-                      key={index}
-                      variants={errorVariants}
-                      initial="hidden"
-                      animate={touched.subject ? "visible" : "hidden"}
-                      className="text-red-400 text-sm mt-1"
-                    >
-                      {error}
-                    </motion.p>
-                  ))}
-                </div>
-                <div>
-                  <label htmlFor="message" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {CONTENT.contact.form.messageLabel}
-                  </label>
-                  <motion.textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    rows={5}
-                    className={`mt-1 block w-full rounded-lg border-${theme === 'dark' ? 'gray-600' : 'gray-400'} bg-${theme === 'dark' ? 'gray-800/30' : 'gray-100/30'} backdrop-blur-sm text-${theme === 'dark' ? 'white' : 'gray-900'} shadow-sm focus:border-${theme === 'dark' ? 'blue-500' : 'purple-600'} focus:ring-${theme === 'dark' ? 'blue-500' : 'purple-600'} p-3 ${
-                      getInputStatus('message') === 'error' ? 'input-error' :
-                      getInputStatus('message') === 'success' ? 'input-success' : ''
-                    }`}
-                    variants={itemVariants}
-                    whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === 'dark' ? 59 : 147}, ${theme === 'dark' ? 130 : 51}, ${theme === 'dark' ? 246 : 234}, 0.5)` }}
-                  />
-                  {errors.message.map((error, index) => (
-                    <motion.p
-                      key={index}
-                      variants={errorVariants}
-                      initial="hidden"
-                      animate={touched.message ? "visible" : "hidden"}
-                      className="text-red-400 text-sm mt-1"
-                    >
-                      {error}
-                    </motion.p>
-                  ))}
-                </div>
+                      {CONTENT.contact.form[`${field}Label`]}
+                    </label>
+                    {field === "message" ? (
+                      <motion.textarea
+                        id={field}
+                        name={field}
+                        value={formData[field]}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        rows={5}
+                        className={`mt-1 block w-full rounded-lg border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
+                          getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
+                        }`}
+                        variants={itemVariants}
+                        whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === "dark" ? 59 : 147}, ${theme === "dark" ? 130 : 51}, ${theme === "dark" ? 246 : 234}, 0.5)` }}
+                      />
+                    ) : (
+                      <motion.input
+                        type={field === "email" ? "email" : "text"}
+                        id={field}
+                        name={field}
+                        value={formData[field]}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={`mt-1 block w-full rounded-full border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
+                          getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
+                        }`}
+                        variants={itemVariants}
+                        whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === "dark" ? 59 : 147}, ${theme === "dark" ? 130 : 51}, ${theme === "dark" ? 246 : 234}, 0.5)` }}
+                      />
+                    )}
+                    {(Array.isArray(errors[field]) ? errors[field] : []).map((error, index) => (
+                      <motion.p
+                        key={index}
+                        variants={errorVariants}
+                        initial="hidden"
+                        animate={touched[field] ? "visible" : "hidden"}
+                        className="text-red-400 text-sm mt-1"
+                      >
+                        {error}
+                      </motion.p>
+                    ))}
+                  </div>
+                ))}
                 <motion.button
                   type="submit"
-                  className={`px-6 py-3 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gradient-to-r from-purple-500 to-blue-600'} text-white font-medium rounded-full transition ${
-                    isProcessing ? "opacity-70 cursor-not-allowed" : `hover:${theme === 'dark' ? 'from-blue-600 hover:to-purple-700' : 'from-purple-600 hover:to-blue-700'}`
-                  }`}
+                  className={`px-6 py-3 ${theme === "dark" ? "bg-gradient-to-r from-blue-500 to-purple-600" : "bg-gradient-to-r from-purple-500 to-blue-600"} text-white font-medium rounded-full transition ${isProcessing ? "opacity-70 cursor-not-allowed" : `hover:${theme === "dark" ? "from-blue-600 hover:to-purple-700" : "from-purple-600 hover:to-blue-700"}`}`}
                   disabled={isProcessing}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
                   style={{ width: isMobile ? "100%" : isTablet ? "50%" : "auto" }}
                 >
-                  {isProcessing ? CONTENT.contact.form.sending : CONTENT.contact.form.submitButton}
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z" />
+                      </svg>
+                      {CONTENT.contact.form.sending}
+                    </span>
+                  ) : (
+                    CONTENT.contact.form.submitButton
+                  )}
                 </motion.button>
               </form>
               {submitStatus === "success" && (
                 <motion.p
                   variants={itemVariants}
-                  className={`text-${theme === 'dark' ? 'green-400' : 'green-600'} mt-6 font-medium`}
+                  className={`text-${theme === "dark" ? "green-400" : "green-600"} mt-6 font-medium`}
                 >
                   {CONTENT.contact.form.successMessage}
                 </motion.p>
@@ -1196,73 +1157,73 @@ const Home = () => {
               {submitStatus === "error" && (
                 <motion.p
                   variants={itemVariants}
-                  className={`text-${theme === 'dark' ? 'red-400' : 'red-600'} mt-6 font-medium`}
+                  className={`text-${theme === "dark" ? "red-400" : "red-600"} mt-6 font-medium`}
                 >
                   {CONTENT.contact.form.errorMessage}
                 </motion.p>
               )}
             </motion.div>
             <motion.div variants={itemVariants} className="space-y-6">
-              <h3 className={`font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-purple-600'} ${isMobile ? "text-xl" : "text-2xl"}`}>
+              <h3 className={`font-bold ${theme === "dark" ? "text-blue-400" : "text-purple-600"} ${isMobile ? "text-xl" : "text-2xl"}`}>
                 {CONTENT.contact.info.title}
               </h3>
-              <div className={`space-y-6 ${theme === 'dark' ? 'bg-gray-800/30' : 'bg-gray-200/30'} backdrop-blur-sm rounded-lg p-6 glass-card`}>
+              <div className={`space-y-6 ${theme === "dark" ? "bg-gray-800/30" : "bg-gray-200/30"} backdrop-blur-sm rounded-lg p-6 glass-card`}>
                 <motion.div className="flex items-center space-x-4" variants={itemVariants}>
                   <motion.div whileHover={{ scale: 1.2 }}>
-                    <Mail className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-400' : 'text-purple-600'}`} />
+                    <Mail className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{CONTENT.contact.info.email.label}</h4>
-                    <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'}`}>{CONTENT.contact.info.email.value}</p>
+                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.email.label}</h4>
+                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.email.value}</p>
                   </div>
                 </motion.div>
                 <motion.div className="flex items-center space-x-4" variants={itemVariants}>
                   <motion.div whileHover={{ scale: 1.2 }}>
-                    <Phone className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-400' : 'text-purple-600'}`} />
+                    <Phone className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{CONTENT.contact.info.phone.label}</h4>
-                    <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'}`}>{CONTENT.contact.info.phone.value}</p>
+                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.phone.label}</h4>
+                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.phone.value}</p>
                   </div>
                 </motion.div>
                 <motion.div className="flex items-center space-x-4" variants={itemVariants}>
                   <motion.div whileHover={{ scale: 1.2 }}>
-                    <MapPin className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-400' : 'text-purple-600'}`} />
+                    <MapPin className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{CONTENT.contact.info.address.label}</h4>
-                    <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'}`}>{CONTENT.contact.info.address.value}</p>
+                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.address.label}</h4>
+                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.address.value}</p>
                   </div>
                 </motion.div>
                 <motion.div className="flex items-center space-x-4" variants={itemVariants}>
                   <motion.div whileHover={{ scale: 1.2 }}>
-                    <Clock className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-400' : 'text-purple-600'}`} />
+                    <Clock className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{CONTENT.contact.info.availability.label}</h4>
-                    <p className={`text-${theme === 'dark' ? 'gray-200' : 'gray-700'}`}>{CONTENT.contact.info.availability.value}</p>
+                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.availability.label}</h4>
+                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.availability.value}</p>
                   </div>
                 </motion.div>
                 <div className="mt-6">
-                  <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4`}>{CONTENT.contact.info.followMe}</h4>
+                  <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-4`}>{CONTENT.contact.info.followMe}</h4>
                   <div className="flex space-x-4">
                     <motion.a
                       href="#"
-                      className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
                       whileHover={{ scale: 1.2 }}
                     >
                       <Instagram className="h-6 w-6" />
                     </motion.a>
                     <motion.a
                       href="#"
-                      className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
                       whileHover={{ scale: 1.2 }}
                     >
                       <Linkedin className="h-6 w-6" />
                     </motion.a>
                     <motion.a
                       href="https://github.com/MrChampion2020"
-                      className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'} hover:text-${theme === 'dark' ? 'blue-400' : 'purple-600'}`}
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
                       whileHover={{ scale: 1.2 }}
                     >
                       <Github className="h-6 w-6" />
