@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { Instagram, Linkedin, Github, Mail, Phone, MapPin, Clock } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -134,6 +134,7 @@ const CONTENT = {
     form: {
       nameLabel: "Name",
       emailLabel: "Email",
+      phoneLabel: "Phone",
       subjectLabel: "Subject",
       messageLabel: "Message",
       submitButton: "Send Message",
@@ -143,26 +144,22 @@ const CONTENT = {
       validation: {
         required: "This field is required.",
         invalidEmail: "Please enter a valid email address.",
+        invalidPhone: "Please enter a valid phone number (e.g., +1234567890).",
+      },
+      placeholders: {
+        name: "Enter your name",
+        email: "Enter your email",
+        phone: "Enter your phone number",
+        subject: "Enter the subject",
+        message: "Enter your message",
       },
     },
     info: {
       title: "Contact Information",
-      email: {
-        label: "Email",
-        value: "championaden.ca@gmail.com",
-      },
-      phone: {
-        label: "Phone",
-        value: "+2349030155327",
-      },
-      address: {
-        label: "Address",
-        value: "101, Ajah, Lagos, Nigeria",
-      },
-      availability: {
-        label: "Availability",
-        value: "Open to work",
-      },
+      email: { label: "Email", value: "championaden.ca@gmail.com" },
+      phone: { label: "Phone", value: "+2349030155327" },
+      address: { label: "Address", value: "101, Ajah, Lagos, Nigeria" },
+      availability: { label: "Availability", value: "Open to work" },
       followMe: "Follow Me",
     },
   },
@@ -216,24 +213,24 @@ const ProfileWave = ({ className }) => (
     initial={{ opacity: 0.4, rotate: 0 }}
     animate={{ opacity: 0.8, rotate: 360 }}
     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-  >
+    >
     <path
       d="M140,70 C160,70 175,85 175,105 C175,125 160,140 140,140 C120,140 105,125 105,105 C105,85 120,70 140,70 Z"
       fill="none"
-      stroke="silver"
+      stroke="inherit"
       strokeWidth="1"
       strokeDasharray="5,5"
     />
     <path
-      d="M140,60 C165,60 185,80 185,105 C185,130 165,150 140,150 C115,150 95,130 95,105 C95,80 115,60 140,60 Z"
+      d="M140,60 C165,95 165,165 185,105 C185,130 165,150 140,150 C115,150 115,135 95,105 C95,80 115,60 140,60 Z"
       fill="none"
       stroke="silver"
       strokeWidth="1"
     />
     <path
-      d="M140,50 C170,50 195,75 195,105 C195,135 170,160 140,160 C110,160 85,135 85,105 C85,75 110,50 140,50 Z"
+      d="M140,50 C170,195 175 195,75 105 C195,135 170,160 135 C190,160 110 135 85,135 85,135 110,105 C85,75 110,50 140,50 Z"
       fill="none"
-      stroke="silver"
+      stroke="grey"
       strokeWidth="1"
       strokeDasharray="10,5"
     />
@@ -247,7 +244,7 @@ const containerVariants = {
     opacity: 1,
     transition: {
       delayChildren: 0.3,
-      staggerChildren: 0.2,
+      staggerChildren: 0.3,
     },
   },
 };
@@ -257,7 +254,7 @@ const itemVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.8, ease: "easeOut" },
+    transition: { duration: 1, ease: "easeOut" },
   },
 };
 
@@ -266,23 +263,33 @@ const letterVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, type: "spring", bounce: 0.4 },
+    transition: { duration: 0.5, type: "spring", bounce: 0.6 },
   },
 };
 
 const imageVariants = {
-  hidden: { scale: 0.9, opacity: 0, rotate: 3 },
+  hidden: { scale: 0.9, opacity: 0, x: -50 },
   visible: {
     scale: 1,
     opacity: 1,
-    rotate: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
+    x: 0,
+    transition: { duration: 1, ease: "easeOut" },
   },
-  hover: { scale: 1.05, transition: { duration: 0.3 } },
+  hover: { scale: 1.1, rotate: 2, transition: { duration: 0.3 } },
+};
+
+const textVariants = {
+  hidden: { opacity: 0, x: 50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 1.5, ease: "easeOut" },
+  },
+  hover: { scale: 1.05, color: "#3b82f6", transition: { duration: 0.3 } },
 };
 
 const buttonVariants = {
-  hover: { scale: 1.05, boxShadow: "0 0 10px rgba(59, 130, 246, 0.5)" },
+  hover: { scale: 1.1, boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)" },
   tap: { scale: 0.95 },
 };
 
@@ -291,10 +298,63 @@ const errorVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
+const inputVariants = {
+  hover: { scale: 1.03, boxShadow: "0 0 10px rgba(59, 130, 246, 0.3)" },
+  tap: { scale: 0.98 },
+  focus: { borderColor: "#3b82f6", boxShadow: "0 0 12px rgba(59, 130, 246, 0.5)" },
+};
+
+const contactItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
+const headingUnderlineVariants = {
+  hidden: { width: 0 },
+  visible: {
+    width: "100%",
+    transition: { duration: 1, ease: "easeOut" },
+  },
+};
+
+const sparkleVariants = {
+  hidden: { opacity: 0, scale: 0 },
+  visible: {
+    opacity: [0, 1, 0],
+    scale: [0, 1.5, 0],
+    transition: { duration: 1.5, repeat: Infinity, repeatDelay: 1 },
+  },
+};
+
+const iconVariants = {
+  hover: {
+    scale: 1.5,
+    rotate: 360,
+    skewX: 10,
+    filter: "drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))",
+    color: "transparent",
+    background: "linear-gradient(45deg, #3b82f6, #9333ea)",
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    transition: {
+      scale: { duration: 0.4, type: "spring", stiffness: 100, damping: 10 },
+      rotate: { duration: 0.8, ease: "linear" },
+      skewX: { duration: 0.3, ease: "easeOut" },
+      filter: { duration: 0.5, ease: "easeInOut" },
+      background: { duration: 0.4 },
+    },
+  },
+};
+
 // Typewriter Text Component
-const TypewriterText = ({ text, delay = 100 }) => {
+const TypewriterText = ({ text, delay = 100, showCursor = false }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCursorBlink, setShowCursorBlink] = useState(true);
 
   useEffect(() => {
     if (currentIndex < text.length) {
@@ -306,81 +366,231 @@ const TypewriterText = ({ text, delay = 100 }) => {
     }
   }, [currentIndex, text, delay]);
 
-  return <span>{displayText}</span>;
+  useEffect(() => {
+    if (showCursor) {
+      const cursorInterval = setInterval(() => {
+        setShowCursorBlink((prev) => !prev);
+      }, 500);
+      return () => clearInterval(cursorInterval);
+    }
+  }, [showCursor]);
+
+  return (
+    <span className="relative">
+      {displayText}
+      {showCursor && (
+        <motion.span
+          className="inline-block w-0.5 h-5 bg-blue-400 ml-1"
+          animate={{ opacity: showCursorBlink ? 1 : 0 }}
+          transition={{ duration: 0.1 }}
+        />
+      )}
+    </span>
+  );
 };
 
 // Custom Heading Components
-const AboutHeading = ({ text }) => (
-  <motion.h2
-    variants={itemVariants}
-    className="relative font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-12 text-2xl sm:text-3xl lg:text-4xl"
-    aria-label={text}
-  >
-    <span className="about-underline">
-      {text.split("").map((char, index) => (
-        <motion.span key={index} variants={letterVariants} style={{ display: "inline-block" }}>
-          {char}
-        </motion.span>
+const AboutHeading = ({ text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <motion.h2
+      ref={ref}
+      initial="hidden"
+      variants={containerVariants}
+      animate={isInView ? "visible" : "hidden"}
+      className="relative font-bold text-center mb-12 text-2xl sm:text-3xl lg:text-4xl"
+      style={{
+        color: "transparent",
+        background: "linear-gradient(to right, #60A5FA, #D946EF)",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+      }}
+      aria-label={text}
+    >
+      <span className="about-underline relative">
+        {text.split(" ").map((word, wordIndex) => (
+          <span key={wordIndex} style={{ display: "inline-block", marginRight: "8px" }}>
+            {word.split("").map((char, charIndex) => (
+              <motion.span
+                key={`${wordIndex}-${charIndex}`}
+                variants={letterVariants}
+                style={{ display: "inline-block" }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </span>
+        ))}
+        <motion.span
+          className="absolute bottom-[-8px] left-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"
+          variants={headingUnderlineVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        />
+      </span>
+    </motion.h2>
+  );
+};
+
+const ProjectsHeading = ({ text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.4 });
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <motion.h2
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="relative font-bold text-center text-blue-400 uppercase mb-12 text-2xl sm:text-3xl lg:text-4xl glitch"
+      aria-label={text}
+      data-text={text}
+      style={{ textShadow: `0 0 10px rgba(59, 130, 246, ${theme === "dark" ? 0.8 : 0.5})` }}
+    >
+      <motion.span
+        className="absolute inset-0 w-full h-full border-t border-b border-blue-500"
+        initial={{ width: 0 }}
+        animate={{ width: "100%" }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+      />
+      {text}
+      <motion.span
+        className="absolute top-0 left-0 w-full h-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.3, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          background: "linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.3), transparent)",
+          filter: "blur(5px)",
+        }}
+      />
+    </motion.h2>
+  );
+};
+
+const PortfolioHeading = ({ text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.4 });
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <motion.h2
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="relative font-bold text-center text-white mb-12 text-2xl sm:text-3xl lg:text-4xl portfolio-3d"
+      aria-label={text}
+      whileHover={{ rotateX: 10, rotateY: 10 }}
+      style={{ perspective: "1000px" }}
+    >
+      {text}
+      <motion.span
+        className="absolute inset-0 border-2 border-transparent"
+        initial={{ borderColor: "transparent" }}
+        animate={{
+          borderColor: [
+            "transparent",
+            `rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.8)`,
+            "transparent",
+          ],
+        }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        style={{ borderRadius: "8px" }}
+      />
+    </motion.h2>
+  );
+};
+
+const TestimonialsHeading = ({ text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.4 });
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <motion.h2
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="relative font-bold text-center text-blue-400 mb-12 text-2xl sm:text-3xl lg:text-4xl testimonial-glow"
+      aria-label={text}
+    >
+      <TypewriterText text={text} delay={100} showCursor={true} />
+      <span className="absolute inset-0 w-full h-full particle-dots" />
+      {[...Array(5)].map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute w-2 h-2 bg-blue-300 rounded-full"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+          }}
+          variants={sparkleVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          transition={{ delay: Math.random() * 1 }}
+        />
       ))}
-    </span>
-  </motion.h2>
-);
+    </motion.h2>
+  );
+};
 
-const ProjectsHeading = ({ text }) => (
-  <motion.h2
-    variants={itemVariants}
-    className="relative font-bold text-center text-blue-400 uppercase mb-12 text-2xl sm:text-3xl lg:text-4xl glitch"
-    aria-label={text}
-    data-text={text}
-  >
-    <motion.span
-      className="absolute inset-0 w-full h-full border-t border-b border-blue-500"
-      initial={{ width: 0 }}
-      animate={{ width: "100%" }}
-      transition={{ duration: 1, ease: "easeOut" }}
-    />
-    {text}
-  </motion.h2>
-);
+const ContactHeading = ({ text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.4 });
+  const { theme } = useContext(ThemeContext);
 
-const PortfolioHeading = ({ text }) => (
-  <motion.h2
-    variants={itemVariants}
-    className="relative font-bold text-center text-white mb-12 text-2xl sm:text-3xl lg:text-4xl portfolio-3d"
-    aria-label={text}
-    whileHover={{ rotateX: 5, rotateY: 5 }}
-  >
-    {text}
-  </motion.h2>
-);
-
-const TestimonialsHeading = ({ text }) => (
-  <motion.h2
-    variants={itemVariants}
-    className="relative font-bold text-center text-blue-400 mb-12 text-2xl sm:text-3xl lg:text-4xl testimonial-glow"
-    aria-label={text}
-  >
-    <TypewriterText text={text} delay={100} />
-    <span className="absolute inset-0 w-full h-full particle-dots" />
-  </motion.h2>
-);
-
-const ContactHeading = ({ text }) => (
-  <motion.h2
-    variants={itemVariants}
-    className="relative font-bold text-center text-blue-400 mb-12 text-2xl sm:text-3xl lg:text-4xl circuit-underline"
-    aria-label={text}
-    initial={{ scale: 0.9 }}
-    animate={{ scale: 1 }}
-    transition={{ duration: 0.6 }}
-  >
-    {text}
-  </motion.h2>
-);
+  return (
+    <motion.h2
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="relative font-bold text-center text-blue-600 mb-12 text-2xl sm:text-3xl lg:text-4xl circuit-underline"
+      aria-label={text}
+      style={{ textShadow: `0 0 8px rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.5)` }}
+    >
+      {text}
+      <motion.span
+        className="absolute bottom-[-10px] left-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"
+        variants={headingUnderlineVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        style={{
+          background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="2"><path d="M0,1h5v1h5" fill="none" stroke="url(%23grad)" stroke-width="1"/></svg>') repeat-x`,
+        }}
+      >
+        <svg width="0" height="0">
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
+              <stop offset="100%" style={{ stopColor: "#9333ea", stopOpacity: 1 }} />
+            </linearGradient>
+          </defs>
+        </svg>
+      </motion.span>
+      <motion.span
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.2, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          background: "radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent)",
+          filter: "blur(10px)",
+        }}
+      />
+    </motion.h2>
+  );
+};
 
 // Home Component
 const Home = () => {
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   const isTablet = useMediaQuery({ query: "(max-width: 768px)" });
   const isDesktop = useMediaQuery({ query: "(max-width: 1024px)" });
@@ -392,18 +602,21 @@ const Home = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
   const [errors, setErrors] = useState({
     name: [],
     email: [],
+    phone: [],
     subject: [],
     message: [],
   });
   const [touched, setTouched] = useState({
     name: false,
     email: false,
+    phone: false,
     subject: false,
     message: false,
   });
@@ -415,27 +628,29 @@ const Home = () => {
 
     switch (name) {
       case "name":
-        if (!value) errors.push("Yo, put a name in there, dummy!");
-        if (value.length < 2) errors.push("Name’s too short, c’mon, give more!");
-        if (value.length > 50) errors.push("Whoa, name’s too long, chill out!");
-        if (!/^[a-zA-Z\s'-]+$/.test(value)) errors.push("No weird stuff in name, just letters and spaces, okay?");
+        if (!value) errors.push(CONTENT.contact.form.validation.required);
+        if (value.length < 2) errors.push("Name is too short.");
+        if (value.length > 50) errors.push("Name is too long.");
+        if (!/^[a-zA-Z\s'-]+$/.test(value)) errors.push("Name can only contain letters, spaces, or hyphens.");
         break;
       case "email":
-        if (!value) errors.push("Oops, need an email, silly!");
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push("That email looks funky, fix it!");
-        if (value.length > 100) errors.push("Email’s too big, shrink it down!");
-        if (!/\.[a-zA-Z]{2,}$/.test(value)) errors.push("Gimme a real email domain, dude!");
+        if (!value) errors.push(CONTENT.contact.form.validation.required);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.push(CONTENT.contact.form.validation.invalidEmail);
+        if (value.length > 100) errors.push("Email is too long.");
+        break;
+      case "phone":
+        if (!value) errors.push(CONTENT.contact.form.validation.required);
+        if (!/^\+?\d{1,4}[-.\s]?\d{1,14}$/.test(value)) errors.push(CONTENT.contact.form.validation.invalidPhone);
         break;
       case "subject":
-        if (!value) errors.push("Hey, gimme a subject, don’t be lazy!");
-        if (value.length < 3) errors.push("Subject’s too tiny, make it bigger!");
-        if (value.length > 100) errors.push("Subject’s too huge, cut it down!");
+        if (!value) errors.push(CONTENT.contact.form.validation.required);
+        if (value.length < 3) errors.push("Subject is too short.");
+        if (value.length > 100) errors.push("Subject is too long.");
         break;
       case "message":
-        if (!value) errors.push("Write something, you goofball!");
-        if (value.length < 10) errors.push("Message’s too short, add more junk!");
-        if (value.length > 1000) errors.push("Whoa, message’s a novel, tone it down!");
-        if (value.split(/\s+/).length < 3) errors.push("Need more words, at least 3, lazybones!");
+        if (!value) errors.push(CONTENT.contact.form.validation.required);
+        if (value.length < 10) errors.push("Message is too short.");
+        if (value.length > 1000) errors.push("Message is too long.");
         break;
       default:
         break;
@@ -446,28 +661,20 @@ const Home = () => {
 
   const validateForm = () => {
     const newErrors = {
-      name: [],
-      email: [],
-      subject: [],
-      message: [],
+      name: validateField("name", formData.name),
+      email: validateField("email", formData.email),
+      phone: validateField("phone", formData.phone),
+      subject: validateField("subject", formData.subject),
+      message: validateField("message", formData.message),
     };
-    let isValid = true;
-
-    Object.keys(formData).forEach((field) => {
-      newErrors[field] = validateField(field, formData[field]);
-      if (newErrors[field].length > 0) isValid = false;
-    });
-
     setErrors(newErrors);
-    return isValid;
+    return Object.values(newErrors).every((err) => err.length === 0);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setTouched({ ...touched, [name]: true });
-
-    // Real-time validation
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
@@ -479,30 +686,23 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Mark all fields as touched
-    setTouched({ name: true, email: true, subject: true, message: true });
-
-    if (!validateForm()) {
-      return;
-    }
-
+    setTouched({ name: true, email: true, phone: true, subject: true, message: true });
+    if (!validateForm()) return;
     setIsProcessing(true);
     try {
       const response = await axios.post(`${API_URL}/api/contact`, formData, {
         headers: { "Content-Type": "application/json" },
-        timeout: 10000, // 10-second timeout
+        timeout: 10000,
       });
       if (response.status === 200) {
         setSubmitStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-        setErrors({ name: [], email: [], subject: [], message: [] });
-        setTouched({ name: false, email: false, subject: false, message: false });
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setTouched({ name: false, email: false, phone: false, subject: false, message: false });
+        setErrors({ name: [], email: [], phone: [], subject: [], message: [] });
       } else {
         setSubmitStatus("error");
       }
     } catch (error) {
-      console.error("Error:", error);
       setSubmitStatus("error");
     } finally {
       setIsProcessing(false);
@@ -513,6 +713,9 @@ const Home = () => {
     if (!touched[field]) return "neutral";
     return errors[field].length === 0 && formData[field] ? "success" : "error";
   };
+
+  const contactRef = useRef(null);
+  const isContactInView = useInView(contactRef, { once: true, amount: 0.4 });
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-white"} text-${theme === "dark" ? "white" : "gray-900"} font-sans overflow-x-hidden`}>
@@ -581,21 +784,23 @@ const Home = () => {
             100% { clip: rect(0, 900px, 0, 0); }
           }
           .portfolio-3d {
-            text-shadow: 0 4px 8px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1}), 0 2px 4px rgba(59, 130, 246, ${theme === "dark" ? 0.5 : 0.3});
-            background: rgba(${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 255 : 0}, ${theme === "dark" ? 0.05 : 0.1});
+            text-shadow: 0 4px 8px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1});
+            background: rgba(${theme === "dark" ? "255, 255, 255" : "0, 0, 0"}, ${theme === "dark" ? 0.05 : 0.1});
             backdrop-filter: blur(10px);
             padding: 8px 16px;
-            border-radius: 8px;
+            border-radius: 5px;
             transform: perspective(1000px) rotateX(0deg);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease-in-out;
           }
           .testimonial-glow {
-            text-shadow: 0 0 10px rgba(59, 130, 246, ${theme === "dark" ? 0.8 : 0.5});
+            text-shadow: 0 0 10px rgba(59, 130, 246, ${theme === "dark" ? 0.65 : 0.65});
             position: relative;
           }
           .particle-dots::before {
             content: '';
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background: radial-gradient(circle, rgba(59, 130, 246, ${theme === "dark" ? 0.3 : 0.1}) 1px, transparent 1px);
@@ -604,8 +809,11 @@ const Home = () => {
             animation: particles 5s linear infinite;
           }
           @keyframes particles {
-            0% { transform: translateY(0); opacity: ${theme === "dark" ? 0.5 : 0.3}; }
-            100% { transform: translateY(-10px); opacity: ${theme === "dark" ? 0.2 : 0.1}; }
+            0% { transform: translateY(0); opacity: ${theme === "dark" ? 0.5 : 0.3} }
+            100% { transform: translateY(-10px); opacity: ${theme === "dark" ? 0.2 : 0.0} }
+          }
+          .circuit-underline {
+            position: relative;
           }
           .circuit-underline::after {
             content: '';
@@ -621,11 +829,12 @@ const Home = () => {
             to { width: 100%; }
           }
           .input-error {
-            border-color: #f87171 !important;
+            border-color: #ff4444 !important;
+            animation: shake 0.3s ease-in-out;
           }
           .input-success {
-            border-color: #32cd32 !important;
-            box-shadow: 0 0 8px rgba(50, 205, 50, 0.3);
+            border-color: #22c55e !important;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
           }
           @keyframes shake {
             0% { transform: translateX(0); }
@@ -635,11 +844,13 @@ const Home = () => {
             100% { transform: translateX(0); }
           }
           .dark {
-            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-bg: rgba(17, 24, 39, 0.5);
             --text-primary: #ffffff;
             --text-secondary: #d1d5db;
             --accent: #3b82f6;
             --nav-text: #ffffff;
+            --icon-glow: rgba(59, 130, 246, 0.8);
+            --icon-color: #3b82f6;
           }
           .light {
             --card-bg: rgba(255, 255, 255, 0.8);
@@ -647,6 +858,8 @@ const Home = () => {
             --text-secondary: #4b5563;
             --accent: #9333ea;
             --nav-text: #111827;
+            --icon-glow: rgba(147, 51, 234, 0.8);
+            --icon-color: #9333ea;
           }
           .glass-card {
             background: var(--card-bg);
@@ -655,11 +868,11 @@ const Home = () => {
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
           }
           .navbar-item {
-            color: var(--nav-text, #ffffff);
+            color: var(--nav-text);
             font-weight: 600;
             padding: 8px 16px;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease-in-out;
             position: relative;
             overflow: hidden;
             display: inline-block;
@@ -677,8 +890,8 @@ const Home = () => {
             left: 0;
             width: 0;
             height: 2px;
-            background: ${theme === "dark" ? "#3b82f6" : "#9333ea"};
-            transition: width 0.3s ease;
+            background-color: ${theme === "dark" ? "#3b82f6" : "#9333ea"};
+            transition: width 0.3s ease-in-out;
           }
           .navbar-item:hover::after {
             width: 100%;
@@ -689,7 +902,7 @@ const Home = () => {
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, ${theme === "dark" ? 0.7 : 0.3}), rgba(0, 0, 0, ${theme === "dark" ? 0.7 : 0.1}));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, ${theme === "dark" ? 0.85 : 0.3}));
             overflow: hidden;
             z-index: 0;
           }
@@ -699,30 +912,26 @@ const Home = () => {
             border: 2px dashed ${theme === "dark" ? "#3b82f6" : "#9333ea"};
             animation: spin 15s linear infinite;
             opacity: 0.5;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
           }
           .tech-wheel:nth-child(1) {
             width: min(300px, 40vw);
             height: min(300px, 40vw);
             top: 10%;
-            left: clamp(5%, 15%, 20%);
+            left: 10%;
             animation-duration: 20s;
           }
           .tech-wheel:nth-child(2) {
             width: min(200px, 30vw);
             height: min(200px, 30vw);
             top: 60%;
-            right: clamp(5%, 20%, 25%);
-            animation-duration: 25s;
+            right: clamp(5%, 10%, 20%);
             animation-direction: reverse;
           }
           .tech-wheel:nth-child(3) {
             width: min(400px, 50vw);
             height: min(400px, 50vw);
             bottom: -10%;
-            left: clamp(40%, 50%, 60%);
+            left: clamp(0%, 40%, 50%);
             animation-duration: 18s;
           }
           .shade-gradient {
@@ -730,21 +939,16 @@ const Home = () => {
             width: min(500px, 60vw);
             height: min(500px, 60vw);
             background: radial-gradient(circle, rgba(${theme === "dark" ? "59, 130, 246" : "147, 51, 234"}, 0.3), transparent);
-            opacity: 0.4;
-            animation: pulse 10s ease-in-out infinite;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
+            opacity: 0.3;
+            animation: pulse 5s ease-in-out infinite;
           }
           .shade-gradient:nth-child(1) {
             top: 20%;
-            left: clamp(20%, 30%, 40%);
-            animation-delay: 2s;
+            left: 20%;
           }
           .shade-gradient:nth-child(2) {
             bottom: 15%;
-            right: clamp(15%, 25%, 35%);
-            animation-delay: 5s;
+            right: clamp(5%, 10%, 20%);
           }
           @keyframes spin {
             from { transform: rotate(0deg); }
@@ -754,6 +958,14 @@ const Home = () => {
             0% { transform: scale(1); opacity: 0.4; }
             50% { transform: scale(1.2); opacity: 0.6; }
             100% { transform: scale(1); opacity: 0.4; }
+          }
+          .social-icon {
+            transition: color 0.4s ease-in-out;
+            color: var(--icon-color, #3b82f6);
+          }
+          .social-icon:hover {
+            color: transparent;
+            -webkit-text-fill-color: transparent;
           }
           @media (max-width: 640px) {
             .tech-wheel:nth-child(1) {
@@ -811,7 +1023,7 @@ const Home = () => {
               <motion.h1
                 variants={itemVariants}
                 className={`font-bold tracking-tight tech-outline ${
-                  isMobile ? "text-3xl" : isTablet ? "text-4xl" : isDesktop ? "text-5xl" : "text-6xl"
+                  isMobile ? "text-3xl" : isTablet ? "text-xl" : isDesktop ? "text-5xl" : "text-6xl"
                 }`}
               >
                 <span className="block text-blue-200">
@@ -822,35 +1034,38 @@ const Home = () => {
                 </span>
               </motion.h1>
               <motion.p
-                variants={itemVariants}
-                className={`${isMobile ? "text-base" : "text-xl"} max-w-3xl ${theme === "dark" ? "text-gray-200" : "text-black"}`}
+                variants={textVariants}
+                className={`max-w-3xl ${theme === "dark" ? "text-gray-200" : "text-gray-700"} ${isMobile ? "text-base" : "text-xl"}`}
                 style={{ fontWeight: 600 }}
               >
                 {CONTENT.hero.description}
               </motion.p>
-              <motion.div variants={itemVariants} className="flex space-x-6">
+              <div className="flex space-x-6">
                 <motion.a
                   href="https://www.instagram.com/sirchampio_n/"
-                  whileHover={{ scale: 1.2 }}
-                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
+                  variants={iconVariants}
+                  whileHover="hover"
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                 >
                   <Instagram className="h-6 w-6" />
                 </motion.a>
                 <motion.a
                   href="https://www.linkedin.com/in/sirchampion/"
-                  whileHover={{ scale: 1.2 }}
-                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
+                  variants={iconVariants}
+                  whileHover="hover"
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                 >
                   <Linkedin className="h-6 w-6" />
                 </motion.a>
                 <motion.a
                   href="https://github.com/MrChampion2020"
-                  whileHover={{ scale: 1.2 }}
-                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
+                  variants={iconVariants}
+                  whileHover="hover"
+                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                 >
                   <Github className="h-6 w-6" />
                 </motion.a>
-              </motion.div>
+              </div>
               <motion.div
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
@@ -914,24 +1129,25 @@ const Home = () => {
                 className={`w-full h-[100%] rounded-lg shadow-lg object-cover backdrop-blur-sm ${theme === "dark" ? "bg-gray-700/30" : "bg-gray-200/30"}`}
               />
             </motion.div>
-            <motion.div variants={itemVariants} className="space-y-6">
-              <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
+            <motion.div variants={containerVariants} className="space-y-6">
+              <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
                 {CONTENT.about.description1}
-              </p>
-              <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
+              </motion.p>
+              <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-200" : "gray-700"} ${isMobile ? "text-base" : "text-lg"}`}>
                 {CONTENT.about.description2}
-              </p>
-              <div className="flex flex-wrap gap-4">
+              </motion.p>
+              <motion.div variants={containerVariants} className="flex flex-wrap gap-4">
                 {(CONTENT.about.skills ?? []).map((skill) => (
                   <motion.span
                     key={skill}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.2, backgroundColor: theme === "dark" ? "#1E40AF" : "#9333EA" }}
                     className={`px-4 py-2 ${theme === "dark" ? "bg-gray-700/30 text-gray-200" : "bg-gray-200/30 text-gray-800"} backdrop-blur-sm rounded-full text-sm font-medium`}
-                    whileHover={{ scale: 1.1, backgroundColor: theme === "dark" ? "#1E40AF" : "#9333EA" }}
                   >
                     {skill}
                   </motion.span>
                 ))}
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </motion.div>
@@ -953,7 +1169,7 @@ const Home = () => {
                 key={index}
                 variants={itemVariants}
                 className={`bg-${theme === "dark" ? "gray-800/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
+                whileHover={{ scale: 1.05, rotate: 2, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <motion.img
                   src={project.image}
@@ -963,14 +1179,19 @@ const Home = () => {
                   whileHover="hover"
                 />
                 <div className="p-6">
-                  <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>{project.title}</h3>
-                  <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>{project.description}</p>
+                  <motion.h3 variants={textVariants} className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>
+                    {project.title}
+                  </motion.h3>
+                  <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>
+                    {project.description}
+                  </motion.p>
                   <motion.a
                     href={project.link}
+                    variants={textVariants}
+                    whileHover={{ x: 10 }}
                     className={`text-${theme === "dark" ? "blue-400" : "purple-600"} hover:text-${theme === "dark" ? "purple-400" : "blue-600"} font-medium`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ x: 5 }}
                   >
                     View Project
                   </motion.a>
@@ -997,7 +1218,7 @@ const Home = () => {
                 key={index}
                 variants={itemVariants}
                 className={`bg-${theme === "dark" ? "gray-700/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg overflow-hidden glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
+                whileHover={{ scale: 1.05, rotate: 2, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <motion.img
                   src={item.image}
@@ -1007,14 +1228,19 @@ const Home = () => {
                   whileHover="hover"
                 />
                 <div className="p-6">
-                  <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>{item.title}</h3>
-                  <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>{item.description}</p>
+                  <motion.h3 variants={textVariants} className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-2`}>
+                    {item.title}
+                  </motion.h3>
+                  <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-200" : "gray-700"} mb-4`}>
+                    {item.description}
+                  </motion.p>
                   <motion.a
                     href={item.link}
+                    variants={textVariants}
+                    whileHover={{ x: 10 }}
                     className={`text-${theme === "dark" ? "blue-400" : "purple-600"} hover:text-${theme === "dark" ? "purple-400" : "blue-600"} font-medium`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ x: 5 }}
                   >
                     View Live Site
                   </motion.a>
@@ -1040,21 +1266,29 @@ const Home = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className={`bg-${theme === "dark" ? "gray-800/30" : "gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg p-6 glass-card`}
-                whileHover={{ scale: 1.03, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
+                className={`bg-${theme === "dark" ? "gray-800/30" : "bg-gray-200/30"} backdrop-blur-sm rounded-lg shadow-lg p-6 glass-card`}
+                whileHover={{ scale: 1.05, rotate: 2, boxShadow: `0 10px 20px rgba(0, 0, 0, ${theme === "dark" ? 0.3 : 0.1})` }}
               >
                 <div className="flex items-center mb-4">
-                  <img
+                  <motion.img
                     src={testimonial.avatar}
                     alt={testimonial.name}
                     className="w-12 h-12 rounded-full mr-4 object-cover"
+                    variants={imageVariants}
+                    whileHover="hover"
                   />
                   <div>
-                    <h3 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{testimonial.name}</h3>
-                    <p className={`text-${theme === "dark" ? "gray-400" : "gray-600"} text-sm`}>{testimonial.role}</p>
+                    <motion.h3 variants={textVariants} className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                      {testimonial.name}
+                    </motion.h3>
+                    <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-400" : "gray-600"} text-sm`}>
+                      {testimonial.role}
+                    </motion.p>
                   </div>
                 </div>
-                <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"} italic`}>"{testimonial.remark}"</p>
+                <motion.p variants={textVariants} className={`text-${theme === "dark" ? "gray-200" : "gray-700"} italic`}>
+                  "{testimonial.remark}"
+                </motion.p>
               </motion.div>
             ))}
           </div>
@@ -1062,26 +1296,32 @@ const Home = () => {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
+      <section id="contact" ref={contactRef} className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
         <motion.div
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
           variants={containerVariants}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          animate={isContactInView ? "visible" : "hidden"}
         >
           <ContactHeading text={CONTENT.contact.title} />
           <div className={`grid ${isTablet ? "grid-cols-1" : "grid-cols-2"} gap-12`}>
-            <motion.div variants={itemVariants} className="space-y-6">
+            <motion.div
+              variants={itemVariants}
+              className="space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isContactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
               <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                {["name", "email", "subject", "message"].map((field) => (
-                  <div key={field}>
-                    <label
+                {["name", "email", "phone", "subject", "message"].map((field) => (
+                  <motion.div key={field} variants={itemVariants}>
+                    <motion.label
                       htmlFor={field}
+                      variants={textVariants}
                       className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
                     >
                       {CONTENT.contact.form[`${field}Label`]}
-                    </label>
+                    </motion.label>
                     {field === "message" ? (
                       <motion.textarea
                         id={field}
@@ -1090,25 +1330,31 @@ const Home = () => {
                         onChange={handleChange}
                         onBlur={handleBlur}
                         rows={5}
+                        placeholder={CONTENT.contact.form.placeholders[field]}
                         className={`mt-1 block w-full rounded-lg border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
                           getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
                         }`}
-                        variants={itemVariants}
-                        whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === "dark" ? 59 : 147}, ${theme === "dark" ? 130 : 51}, ${theme === "dark" ? 246 : 234}, 0.5)` }}
+                        variants={inputVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                        whileFocus="focus"
                       />
                     ) : (
                       <motion.input
-                        type={field === "email" ? "email" : "text"}
+                        type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
                         id={field}
                         name={field}
                         value={formData[field]}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder={CONTENT.contact.form.placeholders[field]}
                         className={`mt-1 block w-full rounded-full border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
                           getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
                         }`}
-                        variants={itemVariants}
-                        whileFocus={{ scale: 1.02, boxShadow: `0 0 8px rgba(${theme === "dark" ? 59 : 147}, ${theme === "dark" ? 130 : 51}, ${theme === "dark" ? 246 : 234}, 0.5)` }}
+                        variants={inputVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                        whileFocus="focus"
                       />
                     )}
                     {(Array.isArray(errors[field]) ? errors[field] : []).map((error, index) => (
@@ -1122,7 +1368,7 @@ const Home = () => {
                         {error}
                       </motion.p>
                     ))}
-                  </div>
+                  </motion.div>
                 ))}
                 <motion.button
                   type="submit"
@@ -1137,7 +1383,7 @@ const Home = () => {
                     <span className="flex items-center justify-center">
                       <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-16 0z" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                       {CONTENT.contact.form.sending}
                     </span>
@@ -1148,89 +1394,149 @@ const Home = () => {
               </form>
               {submitStatus === "success" && (
                 <motion.p
-                  variants={itemVariants}
-                  className={`text-${theme === "dark" ? "green-400" : "green-600"} mt-6 font-medium`}
+                  variants={textVariants}
+                  className={`text-${theme === "dark" ? "green-400" : "green-500"} mt-6 font-medium`}
                 >
                   {CONTENT.contact.form.successMessage}
                 </motion.p>
               )}
               {submitStatus === "error" && (
                 <motion.p
-                  variants={itemVariants}
-                  className={`text-${theme === "dark" ? "red-400" : "red-600"} mt-6 font-medium`}
+                  variants={textVariants}
+                  className={`text-red-400 mt-6 font-medium`}
                 >
                   {CONTENT.contact.form.errorMessage}
                 </motion.p>
               )}
             </motion.div>
-            <motion.div variants={itemVariants} className="space-y-6">
-              <h3 className={`font-bold ${theme === "dark" ? "text-blue-400" : "text-purple-600"} ${isMobile ? "text-xl" : "text-2xl"}`}>
+            <motion.div
+              variants={itemVariants}
+              className="space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isContactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            >
+              <motion.h3
+                variants={textVariants}
+                className={`font-bold ${theme === "dark" ? "text-blue-400" : "text-purple-600"} ${isMobile ? "text-xl" : "text-2xl"}`}
+              >
                 {CONTENT.contact.info.title}
-              </h3>
-              <div className={`space-y-6 ${theme === "dark" ? "bg-gray-800/30" : "bg-gray-200/30"} backdrop-blur-sm rounded-lg p-6 glass-card`}>
-                <motion.div className="flex items-center space-x-4" variants={itemVariants}>
-                  <motion.div whileHover={{ scale: 1.2 }}>
-                    <Mail className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
+              </motion.h3>
+              <motion.div
+                variants={containerVariants}
+                className={`bg-${theme === "dark" ? "gray-800/30" : "gray-200/30"} backdrop-blur-sm rounded-lg p-6 glass-card`}
+              >
+                <motion.div variants={contactItemVariants} className="flex items-center space-x-4 mb-4">
+                  <motion.div variants={iconVariants} whileHover="hover">
+                    <Mail className={`h-6 w-6 text-${theme === "dark" ? "blue-400" : "purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.email.label}</h4>
-                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.email.value}</p>
+                    <motion.h4
+                      variants={textVariants}
+                      className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    >
+                      {CONTENT.contact.info.email.label}
+                    </motion.h4>
+                    <motion.p
+                      variants={textVariants}
+                      className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}
+                    >
+                      {CONTENT.contact.info.email.value}
+                    </motion.p>
                   </div>
                 </motion.div>
-                <motion.div className="flex items-center space-x-4" variants={itemVariants}>
-                  <motion.div whileHover={{ scale: 1.2 }}>
-                    <Phone className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
+                <motion.div variants={contactItemVariants} className="flex items-center space-x-4 mb-4">
+                  <motion.div variants={iconVariants} whileHover="hover">
+                    <Phone className={`h-6 w-6 text-${theme === "dark" ? "blue-400" : "purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.phone.label}</h4>
-                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.phone.value}</p>
+                    <motion.h4
+                      variants={textVariants}
+                      className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    >
+                      {CONTENT.contact.info.phone.label}
+                    </motion.h4>
+                    <motion.p
+                      variants={textVariants}
+                      className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}
+                    >
+                      {CONTENT.contact.info.phone.value}
+                    </motion.p>
                   </div>
                 </motion.div>
-                <motion.div className="flex items-center space-x-4" variants={itemVariants}>
-                  <motion.div whileHover={{ scale: 1.2 }}>
-                    <MapPin className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
+                <motion.div variants={contactItemVariants} className="flex items-center space-x-4 mb-4">
+                  <motion.div variants={iconVariants} whileHover="hover">
+                    <MapPin className={`h-6 w-6 text-${theme === "dark" ? "blue-400" : "purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.address.label}</h4>
-                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.address.value}</p>
+                    <motion.h4
+                      variants={textVariants}
+                      className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    >
+                      {CONTENT.contact.info.address.label}
+                    </motion.h4>
+                    <motion.p
+                      variants={textVariants}
+                      className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}
+                    >
+                      {CONTENT.contact.info.address.value}
+                    </motion.p>
                   </div>
                 </motion.div>
-                <motion.div className="flex items-center space-x-4" variants={itemVariants}>
-                  <motion.div whileHover={{ scale: 1.2 }}>
-                    <Clock className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-purple-600"}`} />
+                <motion.div variants={contactItemVariants} className="flex items-center space-x-4 mb-4">
+                  <motion.div variants={iconVariants} whileHover="hover">
+                    <Clock className={`h-6 w-6 text-${theme === "dark" ? "blue-400" : "purple-600"}`} />
                   </motion.div>
                   <div>
-                    <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{CONTENT.contact.info.availability.label}</h4>
-                    <p className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}>{CONTENT.contact.info.availability.value}</p>
+                    <motion.h4
+                      variants={textVariants}
+                      className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    >
+                      {CONTENT.contact.info.availability.label}
+                    </motion.h4>
+                    <motion.p
+                      variants={textVariants}
+                      className={`text-${theme === "dark" ? "gray-200" : "gray-700"}`}
+                    >
+                      {CONTENT.contact.info.availability.value}
+                    </motion.p>
                   </div>
                 </motion.div>
                 <div className="mt-6">
-                  <h4 className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-4`}>{CONTENT.contact.info.followMe}</h4>
-                  <div className="flex space-x-4">
+                  <motion.h4
+                    variants={textVariants}
+                    className={`text-lg font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"} mb-4`}
+                  >
+                    {CONTENT.contact.info.followMe}
+                  </motion.h4>
+                  <motion.div variants={containerVariants} className="flex space-x-4">
                     <motion.a
-                      href="#"
-                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
-                      whileHover={{ scale: 1.2 }}
+                      href="https://www.instagram.com/sirchampio_n/"
+                      variants={iconVariants}
+                      whileHover="hover"
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                     >
                       <Instagram className="h-6 w-6" />
                     </motion.a>
                     <motion.a
-                      href="#"
-                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
-                      whileHover={{ scale: 1.2 }}
+                      href="https://www.linkedin.com/in/sirchampion/"
+                      variants={iconVariants}
+                      whileHover="hover"
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                     >
                       <Linkedin className="h-6 w-6" />
                     </motion.a>
                     <motion.a
                       href="https://github.com/MrChampion2020"
-                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"}`}
-                      whileHover={{ scale: 1.2 }}
+                      variants={iconVariants}
+                      whileHover="hover"
+                      className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                     >
                       <Github className="h-6 w-6" />
                     </motion.a>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </motion.div>
@@ -1242,3 +1548,6 @@ const Home = () => {
 };
 
 export default Home;
+
+
+

@@ -41,8 +41,18 @@ const itemVariants = {
 };
 
 const letterVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 20, rotateX: -90 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    transition: {
+      delay: i * 0.05,
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+    },
+  }),
 };
 
 const inputVariants = {
@@ -53,7 +63,7 @@ const inputVariants = {
 
 const errorVariants = {
   hidden: { opacity: 0, height: 0 },
-  visible: { opacity: "1", height: "auto", transition: { duration: 0.3 } },
+  visible: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
 };
 
 // Animated Text Component
@@ -62,6 +72,7 @@ const AnimatedText = ({ text }) => (
     {text.split("").map((char, index) => (
       <motion.span
         key={index}
+        custom={index}
         variants={letterVariants}
         style={{ display: "inline-block" }}
       >
@@ -76,18 +87,21 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
   const [formErrors, setFormErrors] = useState({
     name: [],
     email: [],
+    phone: [],
     subject: [],
     message: [],
   });
   const [touched, setTouched] = useState({
     name: false,
     email: false,
+    phone: false,
     subject: false,
     message: false,
   });
@@ -104,35 +118,37 @@ const Contact = () => {
 
     switch (name) {
       case "name":
-        if (!value) errors.push("Yo, put a name in there, dummy!");
-        if (value.length < 2)
-          errors.push("Name’s too short, c’mon, give more!");
-        if (value.length > 50) errors.push("Whoa, name’s too long, chill out!");
+        if (!value) errors.push("Name is required!");
+        if (value.length < 2) errors.push("Name must be at least 2 characters!");
+        if (value.length > 50) errors.push("Name cannot exceed 50 characters!");
         if (!/^[a-zA-Z\s'-]+$/.test(value))
-          errors.push("No weird stuff in name, just letters and spaces, okay?");
+          errors.push("Name can only contain letters, spaces, or hyphens!");
         break;
       case "email":
-        if (!value) errors.push("Oops, need an email, silly!");
+        if (!value) errors.push("Email is required!");
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-          errors.push("That email looks funky, fix it!");
-        if (value.length > 100) errors.push("Email’s too big, shrink it down!");
+          errors.push("Invalid email format!");
+        if (value.length > 100) errors.push("Email cannot exceed 100 characters!");
         if (!/\.[a-zA-Z]{2,}$/.test(value))
-          errors.push("Gimme a real email domain, dude!");
+          errors.push("Email must have a valid domain!");
+        break;
+      case "phone":
+        if (!value) errors.push("Phone number is required!");
+        if (!/^\+?[1-9]\d{1,14}$/.test(value))
+          errors.push("Invalid phone number format (e.g., +2349030155327)!");
+        if (value.length > 15) errors.push("Phone number cannot exceed 15 digits!");
         break;
       case "subject":
-        if (!value) errors.push("Hey, gimme a subject, don’t be lazy!");
-        if (value.length < 3)
-          errors.push("Subject’s too tiny, make it bigger!");
-        if (value.length > 100) errors.push("Subject’s too huge, cut it down!");
+        if (!value) errors.push("Subject is required!");
+        if (value.length < 3) errors.push("Subject must be at least 3 characters!");
+        if (value.length > 100) errors.push("Subject cannot exceed 100 characters!");
         break;
       case "message":
-        if (!value) errors.push("Write something, you goofball!");
-        if (value.length < 10)
-          errors.push("Message’s too short, add more junk!");
-        if (value.length > 1000)
-          errors.push("Whoa, message’s a novel, tone it down!");
+        if (!value) errors.push("Message is required!");
+        if (value.length < 10) errors.push("Message must be at least 10 characters!");
+        if (value.length > 1000) errors.push("Message cannot exceed 1000 characters!");
         if (value.split(/\s+/).length < 3)
-          errors.push("Need more words, at least 3, lazybones!");
+          errors.push("Message must contain at least 3 words!");
         break;
       default:
         break;
@@ -159,44 +175,37 @@ const Contact = () => {
     try {
       await loadSlim(engine);
       setParticlesInit(true);
-      console.log("Particles initialized");
     } catch (error) {
       console.error("Particles init error:", error);
     }
   }, []);
 
   useEffect(() => {
-    console.log(
-      "Contact rendered, theme:",
-      theme,
-      "particlesInit:",
-      particlesInit
-    );
+    console.log("Contact rendered, theme:", theme, "particlesInit:", particlesInit);
   }, [theme, particlesInit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setTouched({ ...touched, [name]: true });
-
-    // Real-time validation
     setFormErrors({ ...formErrors, [name]: validateField(name, value) });
   };
 
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched({ ...touched, [name]: true });
-    setFormErrors({
-      ...formErrors,
-      [name]: validateField(name, formData[name]),
-    });
+    setFormErrors({ ...formErrors, [name]: validateField(name, formData[name]) });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Mark all fields as touched
-    setTouched({ name: true, email: true, subject: true, message: true });
+    setTouched({
+      name: true,
+      email: true,
+      phone: true,
+      subject: true,
+      message: true,
+    });
 
     if (!validateForm()) {
       return;
@@ -209,11 +218,18 @@ const Contact = () => {
       });
       if (response.status === 200) {
         setSubmitStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-        setFormErrors({ name: [], email: [], subject: [], message: [] });
+        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setFormErrors({
+          name: [],
+          email: [],
+          phone: [],
+          subject: [],
+          message: [],
+        });
         setTouched({
           name: false,
           email: false,
+          phone: false,
           subject: false,
           message: false,
         });
@@ -230,9 +246,7 @@ const Contact = () => {
 
   const getInputStatus = (field) => {
     if (!touched[field]) return "neutral";
-    return formErrors[field].length === 0 && formData[field]
-      ? "success"
-      : "error";
+    return formErrors[field].length === 0 && formData[field] ? "success" : "error";
   };
 
   const getButtonTextAndStyle = () => {
@@ -331,11 +345,11 @@ const Contact = () => {
           }
           .form-input {
             background: var(--input-bg);
-            color: var(--input-text, #1f2937) !important; /* Fallback to dark gray */
+            color: var(--input-text, #1f2937) !important;
           }
-            .form-input::placeholder,
-            .form-input,
-            .form-input:focus {
+          .form-input::placeholder,
+          .form-input,
+          .form-input:focus {
             color: var(--input-text) !important;
           }
           @keyframes shake {
@@ -493,7 +507,7 @@ const Contact = () => {
             <AnimatedText text="Contact Me" />
           </motion.h1>
           <motion.p
-            className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto"
+            className="text-base sm:text-xl md:text-xl max-w-1xl/2 mx-auto"
             variants={itemVariants}
             style={{ color: "white", zIndex: 20, fontWeight: 700 }}
           >
@@ -538,7 +552,7 @@ const Contact = () => {
                 <AnimatedText text="Send a Message" />
               </motion.h2>
               <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                {["name", "email", "subject"].map((field) => (
+                {["name", "email", "phone", "subject"].map((field) => (
                   <div key={field} className="input-container">
                     <label
                       htmlFor={field}
@@ -548,13 +562,13 @@ const Contact = () => {
                       {field.charAt(0).toUpperCase() + field.slice(1)}
                     </label>
                     <motion.input
-                      type={field === "email" ? "email" : "text"}
+                      type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
                       id={field}
                       name={field}
                       value={formData[field]}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input search-input ${
+                      className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input ${
                         getInputStatus(field) === "error"
                           ? "input-error"
                           : getInputStatus(field) === "success"
@@ -563,6 +577,7 @@ const Contact = () => {
                       }`}
                       variants={inputVariants}
                       whileFocus="focus"
+                      aria-label={field.charAt(0).toUpperCase() + field.slice(1)}
                     />
                     {getInputStatus(field) === "success" && (
                       <CheckCircle
@@ -604,7 +619,7 @@ const Contact = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     rows={5}
-                    className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input search-input ${
+                    className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input ${
                       getInputStatus("message") === "error"
                         ? "input-error"
                         : getInputStatus("message") === "success"
@@ -613,6 +628,7 @@ const Contact = () => {
                     }`}
                     variants={inputVariants}
                     whileFocus="focus"
+                    aria-label="Message"
                   />
                   {getInputStatus("message") === "success" && (
                     <CheckCircle
@@ -648,6 +664,7 @@ const Contact = () => {
                   disabled={isProcessing}
                   whileHover={{ scale: isProcessing ? 1 : 1.05 }}
                   whileTap={{ scale: isProcessing ? 1 : 0.95 }}
+                  aria-label="Submit form"
                 >
                   {getButtonTextAndStyle().text}
                 </motion.button>
@@ -744,6 +761,7 @@ const Contact = () => {
                         whileHover={{ scale: 1.2 }}
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`Visit ${social.href}`}
                       >
                         {social.icon}
                       </motion.a>
@@ -765,3 +783,6 @@ const Contact = () => {
 };
 
 export default Contact;
+
+
+
