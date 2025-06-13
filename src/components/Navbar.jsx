@@ -45,11 +45,11 @@ const navItems = [
 
 // Mock Content Map for Search
 const contentMap = [
-  { path: '/', name: 'Home', keywords: ['home', 'welcome', 'portfolio', 'champion aden'] },
-  { path: '/services', name: 'Services', keywords: ['services', 'web development', 'design', 'consulting'] },
-  { path: '/projects', name: 'Projects', keywords: ['projects', 'work', 'case studies', 'development'] },
-  { path: '/about', name: 'About', keywords: ['about', 'bio', 'champion aden', 'experience'] },
-  { path: '/contact', name: 'Contact', keywords: ['contact', 'get in touch', 'email', 'phone'] },
+  { path: '/', name: 'Home', keywords: ['home', 'welcome','development', 'mobile apps', 'web development', 'react js', 'react', 'portfolio', 'champion aden', 'aden', 'footer', 'blog', 'contact', 'information', 'email', 'phone', 'x'] },
+  { path: '/services', name: 'Services', keywords: ['services', 'web development', 'design', 'consulting', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
+  { path: '/projects', name: 'Projects', keywords: ['projects', 'work', 'case studies', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
+  { path: '/about', name: 'About', keywords: ['about', 'bio', 'champion aden', 'experience', 'contact', 'information', 'email', 'phone', 'x', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
+  { path: '/contact', name: 'Contact', keywords: ['contact', 'get in touch', 'email', 'phone', 'contact', 'information', 'email', 'x', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
 ];
 
 // Animation Variants
@@ -119,7 +119,8 @@ const Navbar = () => {
         const transcript = event.results[0][0].transcript.toLowerCase();
         console.log('Voice input:', transcript);
         setSearchQuery(transcript);
-        setIsSearchOpen(true); // Keep search open to show transcription
+        setIsSearchOpen(true); // Keep search open on desktop
+        if (isMobile) setIsOpen(true); // Ensure mobile menu is open
         setIsVoiceActive(false);
       };
 
@@ -127,7 +128,8 @@ const Navbar = () => {
         console.error('Voice recognition error:', event.error);
         setVoiceError('Voice recognition failed. Please try again.');
         setIsVoiceActive(false);
-        setIsSearchOpen(true); // Show search area even on error
+        setIsSearchOpen(true); // Show search area on desktop
+        if (isMobile) setIsOpen(true); // Show mobile menu
       };
 
       recognitionRef.current.onend = () => {
@@ -135,7 +137,8 @@ const Navbar = () => {
       };
     } else {
       setVoiceError('Voice recognition is not supported in this browser.');
-      setIsSearchOpen(true); // Show search area to display error
+      setIsSearchOpen(true); // Show search area on desktop
+      if (isMobile) setIsOpen(true); // Show mobile menu
     }
 
     return () => {
@@ -143,7 +146,7 @@ const Navbar = () => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [isMobile]);
 
   // Debug media query
   useEffect(() => {
@@ -209,7 +212,8 @@ const Navbar = () => {
   const handleVoiceSearch = () => {
     if (!recognitionRef.current) {
       setVoiceError('Voice recognition is not supported.');
-      setIsSearchOpen(true); // Open search area to show error
+      setIsSearchOpen(true); // Open search area on desktop
+      if (isMobile) setIsOpen(true); // Open mobile menu
       return;
     }
     if (isVoiceActive) {
@@ -219,14 +223,16 @@ const Navbar = () => {
       try {
         recognitionRef.current.start();
         setIsVoiceActive(true);
-        setIsSearchOpen(true); // Open search area when voice search starts
+        setIsSearchOpen(true); // Open search area on desktop
+        if (isMobile) setIsOpen(true); // Open mobile menu
         setVoiceError(null);
         setSearchQuery('');
       } catch (error) {
         console.error('Voice recognition start error:', error);
         setVoiceError('Failed to start voice recognition.');
         setIsVoiceActive(false);
-        setIsSearchOpen(true); // Open search area to show error
+        setIsSearchOpen(true); // Open search area on desktop
+        if (isMobile) setIsOpen(true); // Open mobile menu
       }
     }
   };
@@ -238,7 +244,7 @@ const Navbar = () => {
 
   return (
     <motion.nav
-      className={`fixed top-0 h-[15%] p-3 left-0 w-full z-50 ${theme === 'dark' 
+      className={`fixed top-0 left-0 w-full z-50 ${theme === 'dark' 
         ? 'bg-gradient-to-r from-gray-900/40 to-blue-950/40' 
         : 'bg-gradient-to-r from-gray-50/40 to-blue-100/40'
       } backdrop-blur-xl border-b border-gray-700/20`}
@@ -259,12 +265,16 @@ const Navbar = () => {
             --text-primary: #ffffff;
             --accent: var(--neon-blue);
             --icon-color: #ffffff;
+            --search-bg: rgba(255, 255, 255, 0.15);
+            --search-placeholder: rgba(255, 255, 255, 0.7);
           }
           .light {
             --bg-primary: rgba(255, 255, 255, 0.8);
             --text-primary: #111827;
             --accent: var(--neon-purple);
             --icon-color: #374151;
+            --search-bg: rgba(0, 0, 0, 0.1);
+            --search-placeholder: rgba(0, 0, 0, 0.6);
           }
           .holographic-text {
             background: linear-gradient(45deg, #60a5fa, #c084fc, #fb7185);
@@ -290,6 +300,19 @@ const Navbar = () => {
             transform: translateY(-2px);
             text-shadow: 0 0 20px var(--accent), 0 0 30px var(--neon-pink);
           }
+          .mobile-nav-item {
+            box-shadow: 0 0 25px ${theme === 'dark' 
+              ? 'rgba(59, 130, 246, 0.6)' 
+              : 'rgba(147, 51, 234, 0.4)'};
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+          .mobile-nav-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px ${theme === 'dark' 
+              ? 'rgba(59, 130, 246, 0.8)' 
+              : 'rgba(147, 51, 234, 0.6)'};
+          }
           .active-nav::after {
             content: '';
             position: absolute;
@@ -313,11 +336,11 @@ const Navbar = () => {
             backdrop-filter: blur(10px);
           }
           .search-input {
-            background: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-            color: ${theme === 'dark' ? '#ffffff' : '#111827'};
+            background: var(--search-bg);
+            color: var(--text-primary);
           }
           .search-input::placeholder {
-            color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};
+            color: var(--search-placeholder);
           }
           .voice-error {
             background: rgba(239, 68, 68, 0.9);
@@ -539,7 +562,7 @@ const Navbar = () => {
           style={{ backgroundImage: `url(${blue})`, backgroundSize: 'cover' }}
         >
           <div className="flex flex-col items-center justify-between h-full py-6 mobile-menu-container">
-            <div className="flex flex-col items-center flex-grow justify-center space-y-4">
+            <div className="flex flex-col items-center flex-grow justify-center space-y-3">
               {navItems.map((item) => (
                 <motion.button
                   key={item.name}
@@ -547,11 +570,11 @@ const Navbar = () => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleNavigation(item.path);
                   }}
-                  className={`text-xl font-bold holographic-text futuristic-glow px-5 py-2 rounded-lg mobile-nav-item ${
+                  className={`text-lg font-bold holographic-text futuristic-glow px-6 py-2.5 rounded-xl mobile-nav-item max-w-xs w-full ${
                     location.pathname === item.path ? 'active-nav' : ''
                   }`}
                   variants={itemVariants}
-                  whileHover={{ scale: 1.15 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   tabIndex={0}
                 >
@@ -559,7 +582,7 @@ const Navbar = () => {
                 </motion.button>
               ))}
             </div>
-            <div className="flex flex-col items-center space-y-4 w-full px-4">
+            <div className="flex flex-col items-center space-y-3 w-full px-4">
               <motion.form
                 onSubmit={handleSearch}
                 variants={itemVariants}
@@ -634,5 +657,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
