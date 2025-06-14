@@ -16,7 +16,6 @@ import avatar3 from "../../assets/Avatar3.png";
 import Feeda from "../../assets/Feeda.png";
 import delivery from "../../assets/delivery.jpeg";
 import { useMediaQuery } from "react-responsive";
-import logo from "../../assets/logo.png";
 import axios from "axios";
 import API_URL from "./config";
 import { ThemeContext } from "../../screens/context/ThemeContext";
@@ -213,7 +212,7 @@ const ProfileWave = ({ className }) => (
     initial={{ opacity: 0.4, rotate: 0 }}
     animate={{ opacity: 0.8, rotate: 360 }}
     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-    >
+  >
     <path
       d="M140,70 C160,70 175,85 175,105 C175,125 160,140 140,140 C120,140 105,125 105,105 C105,85 120,70 140,70 Z"
       fill="none"
@@ -403,7 +402,7 @@ const AboutHeading = ({ text }) => {
       animate={isInView ? "visible" : "hidden"}
       className="relative font-bold text-center mb-12 text-2xl sm:text-3xl lg:text-4xl"
       style={{
-        color: "transparent",
+        color: "#60A5FA",
         background: "linear-gradient(to right, #60A5FA, #D946EF)",
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
@@ -967,6 +966,13 @@ const Home = () => {
             color: transparent;
             -webkit-text-fill-color: transparent;
           }
+          input, textarea {
+            color: var(--text-primary) !important;
+          }
+          input::placeholder, textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+          }
           @media (max-width: 640px) {
             .tech-wheel:nth-child(1) {
               width: min(200px, 50vw);
@@ -1029,7 +1035,7 @@ const Home = () => {
                 <span className="block text-blue-200">
                   <TypewriterText text={CONTENT.hero.greeting} delay={100} />
                 </span>
-                <span className={`block ${theme === "dark" ? "text-black" : "text-white"}`}>
+                <span className={`block ${theme === "dark" ? "text-[#60A5FA]" : "text-[rgb(1, 16, 39]"}`}>
                   <TypewriterText text={CONTENT.hero.name} delay={100} />
                 </span>
               </motion.h1>
@@ -1053,7 +1059,7 @@ const Home = () => {
                   href="https://www.linkedin.com/in/sirchampion/"
                   variants={iconVariants}
                   whileHover="hover"
-                  className={`text-${theme === "dark" ? "gray-400" : "gray-600"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
+                  className={`text-${theme === "dark" ? "gray-200" : "gray-300"} hover:text-${theme === "dark" ? "blue-400" : "purple-600"} social-icon`}
                 >
                   <Linkedin className="h-6 w-6" />
                 </motion.a>
@@ -1068,25 +1074,23 @@ const Home = () => {
               </div>
               <motion.div
                 variants={itemVariants}
-                className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
+                className="flex flex-row space-x-4 lg:flex-row lg:space-x-0 lg:space-y-4 gap-5"
               >
                 <motion.a
                   href="contact"
-                  className={`px-6 py-3 ${theme === "dark" ? "bg-gradient-to-r from-blue-500 to-purple-600" : "bg-gradient-to-r from-purple-500 to-blue-600"} text-white font-medium rounded-full hover:${theme === "dark" ? "from-blue-600 hover:to-purple-700" : "from-purple-600 hover:to-blue-700"} transition`}
+                  className={`px-6 py-3 ${theme === "dark" ? "bg-gradient-to-r from-blue-500 to-purple-600" : "bg-gradient-to-r from-purple-500 to-blue-600"} text-white font-medium rounded-full hover:${theme === "dark" ? "from-blue-600 hover:to-purple-700" : "from-purple-600 hover:to-blue-700"} transition w-full lg:w-[20%]`}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
-                  style={{ width: isMobile ? "100%" : isTablet ? "50%" : "auto" }}
                 >
                   {CONTENT.hero.hireMe}
                 </motion.a>
                 <motion.a
                   href="/cv"
-                  className={`px-6 py-3 border ${theme === "dark" ? "border-gray-600 text-gray-200" : "border-gray-400 text-gray-800"} font-medium rounded-full hover:${theme === "dark" ? "bg-gray-800" : "bg-gray-200"} transition`}
+                  className={`px-6 py-3 border ${theme === "dark" ? "border-gray-600 text-gray-200" : "border-gray-400 text-gray-800"} font-medium rounded-full hover:${theme === "dark" ? "bg-gray-800" : "bg-gray-200"} transition w-full lg:w-[20%] `}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
-                  style={{ width: isMobile ? "100%" : isTablet ? "50%" : "auto" }}
                 >
                   {CONTENT.hero.downloadCV}
                 </motion.a>
@@ -1331,7 +1335,7 @@ const Home = () => {
                         onBlur={handleBlur}
                         rows={5}
                         placeholder={CONTENT.contact.form.placeholders[field]}
-                        className={`mt-1 block w-full rounded-lg border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
+                        className={`mt-1 block w-full rounded-lg border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/50" : "gray-100/50"} text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
                           getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
                         }`}
                         variants={inputVariants}
@@ -1348,7 +1352,7 @@ const Home = () => {
                         onChange={handleChange}
                         onBlur={handleBlur}
                         placeholder={CONTENT.contact.form.placeholders[field]}
-                        className={`mt-1 block w-full rounded-full border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/30" : "gray-100/30"} backdrop-blur-sm text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
+                        className={`mt-1 block w-full rounded-full border-${theme === "dark" ? "gray-600" : "gray-400"} bg-${theme === "dark" ? "gray-800/50" : "gray-100/50"} text-${theme === "dark" ? "white" : "gray-900"} shadow-sm focus:border-${theme === "dark" ? "blue-500" : "purple-600"} focus:ring-${theme === "dark" ? "blue-500" : "purple-600"} p-3 ${
                           getInputStatus(field) === "error" ? "input-error" : getInputStatus(field) === "success" ? "input-success" : ""
                         }`}
                         variants={inputVariants}
