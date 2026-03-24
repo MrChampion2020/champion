@@ -1,11 +1,8 @@
-const browserHostname =
-  typeof window !== "undefined" ? window.location.hostname : "";
+const configuredApiUrl = (import.meta.env.VITE_CONTACT_API_URL || "")
+  .trim()
+  .replace(/\/+$/, "");
 
-const localApiUrl = browserHostname
-  ? `http://${browserHostname}:3000`
-  : "http://localhost:3000";
-
-const API_URL = localApiUrl;
+const API_URL = configuredApiUrl || "https://champion-service.vercel.app";
 
 
 export default API_URL;
