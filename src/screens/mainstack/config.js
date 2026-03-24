@@ -1,4 +1,11 @@
-const API_URL = "https://champion-backend-elf5.onrender.com";
+const browserHostname =
+  typeof window !== "undefined" ? window.location.hostname : "";
+
+const localApiUrl = browserHostname
+  ? `http://${browserHostname}:3000`
+  : "http://localhost:3000";
+
+const API_URL = localApiUrl;
 
 
 export default API_URL;

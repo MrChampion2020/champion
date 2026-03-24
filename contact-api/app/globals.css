@@ -1,0 +1,65 @@
+:root {
+  color-scheme: dark;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(140, 111, 78, 0.2), transparent 35%),
+    linear-gradient(180deg, #10143d, #0b102d);
+  color: #f6f8fb;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+main {
+  width: min(42rem, 100%);
+  padding: 2rem;
+  border: 1px solid rgba(236, 239, 241, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(18, 24, 68, 0.82);
+  box-shadow: 0 24px 60px rgba(3, 6, 22, 0.32);
+}
+
+h1,
+h2,
+p,
+ul {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 0.75rem;
+}
+
+p,
+li {
+  color: rgba(246, 248, 251, 0.82);
+  line-height: 1.7;
+}
+
+section + section {
+  margin-top: 1.5rem;
+}
+
+code {
+  font-family: "Cascadia Code", Consolas, monospace;
+  color: #eceff1;
+}
+
+ul {
+  padding-left: 1.2rem;
+}

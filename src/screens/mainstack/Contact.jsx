@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   MapPin,
@@ -14,13 +14,16 @@ import {
 } from "lucide-react";
 import { Tilt } from "react-tilt";
 import Navbar from "../../components/Navbar";
+import BrandLoader from "../../components/BrandLoader";
 import Footer from "../../components/Footer";
-import { ThemeContext } from "../../screens/context/ThemeContext";
+import PageHero from "../../components/PageHero";
+import PhoneCountrySelect from "../../components/PhoneCountrySelect";
+import heroPortrait from "../../assets/me/hero.jpeg";
 import axios from "axios";
 import API_URL from "./config";
 import { useMediaQuery } from "react-responsive";
-import Particles from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import { DEFAULT_PHONE_COUNTRY } from "../../data/phoneCountries";
+import { buildInternationalPhoneNumber, isValidPhoneNumber } from "../../utils/phoneValidation";
 
 // Animation Variants
 const containerVariants = {
@@ -83,7 +86,6 @@ const AnimatedText = ({ text }) => (
 );
 
 const Contact = () => {
-  const { theme } = useContext(ThemeContext) || { theme: "dark" };
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -107,13 +109,13 @@ const Contact = () => {
   });
   const [submitStatus, setSubmitStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [particlesInit, setParticlesInit] = useState(false);
+  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_PHONE_COUNTRY);
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   const isTablet = useMediaQuery({ query: "(max-width: 768px)" });
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-  const validateField = (name, value) => {
+  const validateField = (name, value, country = phoneCountry) => {
     const errors = [];
 
     switch (name) {
@@ -134,9 +136,8 @@ const Contact = () => {
         break;
       case "phone":
         if (!value) errors.push("Phone number is required!");
-        if (!/^\+?[1-9]\d{1,14}$/.test(value))
-          errors.push("Invalid phone number format (e.g., +2349030155327)!");
-        if (value.length > 15) errors.push("Phone number cannot exceed 15 digits!");
+        if (value && !isValidPhoneNumber(value, country))
+          errors.push("Select a country code and enter a valid phone number!");
         break;
       case "subject":
         if (!value) errors.push("Subject is required!");
@@ -171,30 +172,28 @@ const Contact = () => {
     return isValid;
   };
 
-  const initParticles = useCallback(async (engine) => {
-    try {
-      await loadSlim(engine);
-      setParticlesInit(true);
-    } catch (error) {
-      console.error("Particles init error:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log("Contact rendered, theme:", theme, "particlesInit:", particlesInit);
-  }, [theme, particlesInit]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setTouched({ ...touched, [name]: true });
-    setFormErrors({ ...formErrors, [name]: validateField(name, value) });
+    setFormErrors({ ...formErrors, [name]: validateField(name, value, phoneCountry) });
   };
 
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched({ ...touched, [name]: true });
-    setFormErrors({ ...formErrors, [name]: validateField(name, formData[name]) });
+    setFormErrors({ ...formErrors, [name]: validateField(name, formData[name], phoneCountry) });
+  };
+
+  const handlePhoneCountryChange = (nextCountry) => {
+    setPhoneCountry(nextCountry);
+
+    if (touched.phone || formData.phone) {
+      setFormErrors({
+        ...formErrors,
+        phone: validateField("phone", formData.phone, nextCountry),
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -212,13 +211,19 @@ const Contact = () => {
     }
 
     setIsProcessing(true);
+    const submission = {
+      ...formData,
+      phone: buildInternationalPhoneNumber(formData.phone, phoneCountry),
+    };
+
     try {
-      const response = await axios.post(`${API_URL}/api/contact`, formData, {
+      const response = await axios.post(`${API_URL}/api/contact`, submission, {
         headers: { "Content-Type": "application/json" },
       });
       if (response.status === 200) {
         setSubmitStatus("success");
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setPhoneCountry(DEFAULT_PHONE_COUNTRY);
         setFormErrors({
           name: [],
           email: [],
@@ -253,211 +258,30 @@ const Contact = () => {
     if (isProcessing)
       return {
         text: "Sending...",
-        className: "opacity-50 cursor-not-allowed text-white bg-gray-600",
+        className: "theme-button-secondary opacity-70 cursor-not-allowed",
       };
     if (submitStatus === "success")
-      return { text: "Sent!", className: "bg-green-500 text-white" };
+      return { text: "Sent!", className: "theme-button-primary" };
     if (submitStatus === "error")
-      return { text: "Failed!", className: "bg-red-500 text-white" };
+      return { text: "Failed!", className: "theme-button-secondary border border-red-500 text-red-500" };
     return {
       text: "Send Message",
-      className: "bg-gradient-to-r from-blue-600 to-purple-600 text-white",
+      className: "theme-button-primary",
     };
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        theme === "dark" ? "bg-gray-900" : "bg-white"
-      } overflow-x-hidden`}
-    >
-      <style>
-        {`
-          :root {
-            --neon-blue: #3b82f6;
-            --neon-purple: #9333ea;
-          }
-          .dark {
-            --card-bg: rgba(17, 24, 39, 0.7);
-            --text-primary: #ffffff;
-            --text-secondary: #d1d5db;
-            --accent: var(--neon-blue);
-            --input-bg: transparent;
-            --input-text: #ffffff;
-          }
-          .light {
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-primary: black;
-            --text-secondary: #4b5563;
-            --accent: var(--neon-purple);
-            --input-bg: rgba(243, 244, 246, 0.9);
-            --input-text: #1f2937;
-          }
-          .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-          }
-          .glow {
-            box-shadow: 0 0 8px var(--accent);
-          }
-          .gradient-text {
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-          }
-          .parallax-bg {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            opacity: 0.1;
-          }
-          @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
-          body { font-family: 'Comic Neue', cursive; }
-          .hero-text {
-            position: relative;
-            z-index: 20 !important;
-          }
-          .input-container {
-            position: relative;
-          }
-          .input-status-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          .error-message {
-            display: block;
-            color: #ff6347;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            font-style: italic;
-          }
-          .input-error {
-            border-color: #ff6347 !important;
-            box-shadow: 0 0 8px rgba(255, 99, 71, 0.3);
-            animation: shake 0.5s;
-          }
-          .input-success {
-            border-color: #32cd32 !important;
-            box-shadow: 0 0 8px rgba(50, 205, 50, 0.3);
-          }
-          .form-input {
-            background: var(--input-bg);
-            color: var(--input-text, #1f2937) !important;
-          }
-          .form-input::placeholder,
-          .form-input,
-          .form-input:focus {
-            color: var(--input-text) !important;
-          }
-          @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-          }
-          .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, ${
-              theme === "dark" ? 0.7 : 0.3
-            }), rgba(0, 0, 0, ${theme === "dark" ? 0.7 : 0.1}));
-            overflow: hidden;
-            z-index: 0;
-          }
-          .tech-wheel {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px dashed ${theme === "dark" ? "#3b82f6" : "#9333ea"};
-            animation: spin 15s linear infinite;
-            opacity: 0.5;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .tech-wheel:nth-child(1) {
-            width: min(300px, 40vw);
-            height: min(300px, 40vw);
-            top: 10%;
-            left: clamp(5%, 15%, 20%);
-            animation-duration: 20s;
-          }
-          .tech-wheel:nth-child(2) {
-            width: min(200px, 30vw);
-            height: min(200px, 30vw);
-            top: 60%;
-            right: clamp(5%, 20%, 25%);
-            animation-duration: 25s;
-            animation-direction: reverse;
-          }
-          .shade-gradient {
-            position: absolute;
-            width: min(400px, 50vw);
-            height: min(400px, 50vw);
-            background: radial-gradient(circle, rgba(${
-              theme === "dark" ? "59, 130, 246" : "147, 51, 234"
-            }, 0.3), transparent);
-            opacity: 0.4;
-            animation: pulse 10s ease-in-out infinite;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .shade-gradient:nth-child(1) {
-            top: 20%;
-            left: clamp(20%, 30%, 40%);
-            animation-delay: 2s;
-          }
-          .shade-gradient:nth-child(2) {
-            bottom: 15%;
-            right: clamp(15%, 25%, 35%);
-            animation-delay: 5s;
-          }
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 0.4; }
-          }
-          @media (max-width: 640px) {
-            .tech-wheel:nth-child(1) {
-              width: min(200px, 50vw);
-              height: min(200px, 50vw);
-              top: 5%;
-              left: 10%;
-            }
-            .tech-wheel:nth-child(2) {
-              width: min(150px, 40vw);
-              height: min(150px, 40vw);
-              top: 50%;
-              right: 10%;
-            }
-            .shade-gradient {
-              width: min(300px, 70vw);
-              height: min(300px, 70vw);
-            }
-            .shade-gradient:nth-child(1) {
-              top: 15%;
-              left: 20%;
-            }
-            .shade-gradient:nth-child(2) {
-              bottom: 10%;
-              right: 20%;
-            }
-          }
-        `}
-      </style>
+    <div className="theme-page overflow-x-hidden">
       <Navbar />
       {/* Hero Section */}
+      <PageHero
+        eyebrow="Contact"
+        title="Contact Me"
+        description="I am committed to exceptional collaboration and clear communication. Reach out to discuss your product goals, timelines, and the digital experience you want to build next."
+        image={heroPortrait}
+        imageAlt="Champion Aden portrait"
+      />
+      {false && (
       <motion.section
         className="relative h-[60vh] flex items-center justify-center overflow-hidden"
         initial="hidden"
@@ -480,7 +304,7 @@ const Contact = () => {
                 size: { value: 3 },
                 move: { speed: 0.5 },
                 links: { enable: true, distance: 150, opacity: 0.4 },
-                color: { value: theme === "dark" ? "#3b82f6" : "#9333ea" },
+                color: { value: theme === "dark" ? "#8C6F4E" : "#191970" },
               },
               interactivity: {
                 events: { onHover: { enable: true, mode: "repulse" } },
@@ -489,10 +313,7 @@ const Contact = () => {
             }}
           />
         )}
-        <div
-          className="absolute inset-0"
-          style={{ background: "rgba(0, 0, 0, 0.5)", zIndex: 1 }}
-        />
+        <div className="theme-hero-scrim" />
         <motion.div
           className="relative text-center hero-text max-w-full px-4"
           variants={containerVariants}
@@ -509,16 +330,18 @@ const Contact = () => {
           <motion.p
             className="text-base sm:text-xl md:text-xl max-w-1xl/2 mx-auto"
             variants={itemVariants}
-            style={{ color: "white", zIndex: 20, fontWeight: 700 }}
+            style={{ color: "var(--brand-surface)", zIndex: 20, fontWeight: 700 }}
           >
             I'm committed to providing exceptional support and collaboration
             opportunities. Reach out to discuss your needs.
           </motion.p>
         </motion.div>
       </motion.section>
+      )}
       {/* Contact Form and Info Section */}
       <motion.section
-        className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
+        id="contact-form"
+        className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative scroll-mt-28"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -561,24 +384,61 @@ const Contact = () => {
                     >
                       {field.charAt(0).toUpperCase() + field.slice(1)}
                     </label>
-                    <motion.input
-                      type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
-                      id={field}
-                      name={field}
-                      value={formData[field]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input ${
-                        getInputStatus(field) === "error"
-                          ? "input-error"
-                          : getInputStatus(field) === "success"
-                          ? "input-success"
-                          : ""
-                      }`}
-                      variants={inputVariants}
-                      whileFocus="focus"
-                      aria-label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    />
+                    {field === "phone" ? (
+                      <>
+                        <div className="phone-field-grid mt-2">
+                          <PhoneCountrySelect
+                            value={phoneCountry}
+                            onChange={handlePhoneCountryChange}
+                            triggerClassName="form-input rounded-lg"
+                            ariaLabel="Country code"
+                          />
+                          <motion.input
+                            type="tel"
+                            id={field}
+                            name={field}
+                            value={formData[field]}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            inputMode="tel"
+                            autoComplete="tel-national"
+                            placeholder="903 015 5327"
+                            className={`block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input ${
+                              getInputStatus(field) === "error"
+                                ? "input-error"
+                                : getInputStatus(field) === "success"
+                                ? "input-success"
+                                : ""
+                            }`}
+                            variants={inputVariants}
+                            whileFocus="focus"
+                            aria-label="Phone number"
+                          />
+                        </div>
+                        <span className="phone-field-note">
+                          Choose your country code, then enter the rest of your number without it.
+                        </span>
+                      </>
+                    ) : (
+                      <motion.input
+                        type={field === "email" ? "email" : "text"}
+                        id={field}
+                        name={field}
+                        value={formData[field]}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={`mt-2 block w-full rounded-lg border border-gray-600 focus:border-[var(--accent)] focus:ring-0 p-3 form-input ${
+                          getInputStatus(field) === "error"
+                            ? "input-error"
+                            : getInputStatus(field) === "success"
+                            ? "input-success"
+                            : ""
+                        }`}
+                        variants={inputVariants}
+                        whileFocus="focus"
+                        aria-label={field.charAt(0).toUpperCase() + field.slice(1)}
+                      />
+                    )}
                     {getInputStatus(field) === "success" && (
                       <CheckCircle
                         className="input-status-icon text-green-500"
@@ -658,7 +518,7 @@ const Contact = () => {
                 </div>
                 <motion.button
                   type="submit"
-                  className={`px-6 py-3 rounded-lg font-medium glow ${
+                  className={`rounded-lg px-6 py-3 font-medium glow ${
                     getButtonTextAndStyle().className
                   } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
                   disabled={isProcessing}
@@ -666,7 +526,14 @@ const Contact = () => {
                   whileTap={{ scale: isProcessing ? 1 : 0.95 }}
                   aria-label="Submit form"
                 >
-                  {getButtonTextAndStyle().text}
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <BrandLoader inline />
+                      {getButtonTextAndStyle().text}
+                    </span>
+                  ) : (
+                    getButtonTextAndStyle().text
+                  )}
                 </motion.button>
               </form>
             </motion.div>
@@ -690,7 +557,7 @@ const Contact = () => {
                   {
                     icon: <Mail />,
                     title: "Email",
-                    value: "championaden.ca@gmail.com",
+                    value: "champion@feeda.us",
                   },
                   { icon: <Phone />, title: "Phone", value: "+2349030155327" },
                   {
@@ -773,8 +640,9 @@ const Contact = () => {
           </Tilt>
         </div>
       </motion.section>
+      
       <motion.div
-        className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-purple-600 z-50"
+        className="theme-progress-bar fixed bottom-0 left-0 z-50 h-1 w-full"
         style={{ scaleX }}
       />
       <Footer />
@@ -783,6 +651,7 @@ const Contact = () => {
 };
 
 export default Contact;
+
 
 
 

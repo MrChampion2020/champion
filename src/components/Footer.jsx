@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaGlobe, FaInstagram, FaTwitter, FaArrowUp } from 'react-icons/fa';
 import { useMediaQuery } from 'react-responsive';
-import { ThemeContext } from '../screens/context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 import logo from "../assets/logo.png"
 
 // Content Constants
@@ -18,7 +18,7 @@ const CONTENT = {
       { label: 'Projects', href: '/projects' },
       { label: 'About Me', href: '/about' },
       { label: 'Contact', href: '/contact' },
-      { label: 'Portfolio', href: '/portfolio' },
+      // { label: 'Portfolio', href: '/portfolio' },
       { label: 'Blog', href: '/blog' },
     ],
   },
@@ -27,15 +27,15 @@ const CONTENT = {
     items: [
       { icon: FaMapMarkerAlt, label: 'Address', value: '101, Ajah, Lagos, Nigeria', href: '#' },
       { icon: FaPhoneAlt, label: 'Phone', value: '+2349030155327', href: 'tel:+2349030155327' },
-      { icon: FaEnvelope, label: 'Email', value: 'championaden.ca@gmail.com', href: 'mailto:championaden.ca@gmail.com' },
-      { icon: FaGlobe, label: 'Website', value: 'www.championaden.online', href: 'https://www.championaden.online' },
+      { icon: FaEnvelope, label: 'Email', value: 'champion@feeda.us', href: 'mailto:champion@feeda.us' },
+      { icon: FaGlobe, label: 'Website', value: 'champion.feeda.us', href: 'https://champion.feeda.us' },
     ],
   },
   socials: [
     { icon: FaInstagram, href: 'https://instagram.com/sirchampio_n', label: 'Instagram' },
     { icon: FaTwitter, href: 'https://x.com/sirchampionad', label: 'Twitter' },
   ],
-  copyright: `© ${new Date().getFullYear()} Sir Champion Aden | All rights reserved`,
+  copyright: `Copyright ${new Date().getFullYear()} Sir Champion Aden | All rights reserved`,
 };
 
 // Animation Variants
@@ -93,18 +93,19 @@ const particleVariants = {
 // Particle Component
 const Particle = () => (
   <motion.div
-    className="absolute w-2 h-2 bg-blue-400 rounded-full"
+    className="absolute h-2 w-2 rounded-full"
     style={{
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
+      backgroundColor: 'var(--accent)',
     }}
     variants={particleVariants}
     animate="animate"
   />
 );
 
-const Footer = ({ navigation }) => {
-  const { theme } = useContext(ThemeContext);
+const Footer = () => {
+  const navigate = useNavigate();
   const isMobile = useMediaQuery({ query: '(max-width: 640px)' });
   const isTablet = useMediaQuery({ query: '(max-width: 1024px)' });
   const ref = useRef(null);
@@ -123,55 +124,12 @@ const Footer = ({ navigation }) => {
   return (
     <motion.footer
       ref={ref}
-      className={`relative ${theme === 'dark' 
-        ? 'bg-gradient-to-br from-gray-900 via-blue-950 to-purple-950 text-white' 
-        : 'bg-gradient-to-br from-gray-50 via-blue-100 to-purple-100 text-gray-900'
-      } overflow-hidden py-20`}
+      className="theme-footer-shell relative overflow-hidden py-20"
       initial="hidden"
       whileInView="visible"
       variants={containerVariants}
       viewport={{ once: false }}
     >
-      <style>
-        {`
-          .futuristic-glow {
-            background: ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.2)' 
-              : 'rgba(59, 130, 246, 0.1)'};
-            box-shadow: 0 0 20px ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.6)' 
-              : 'rgba(59, 130, 246, 0.3)'};
-            border: 1px solid ${theme === 'dark' 
-              ? 'rgba(255, 255, 255, 0.2)' 
-              : 'rgba(0, 0, 0, 0.1)'};
-            backdrop-filter: blur(15px);
-          }
-          .hover-glow:hover {
-            box-shadow: 0 0 30px ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.8)' 
-              : 'rgba(59, 130, 246, 0.5)'};
-            transform: translateY(-5px);
-          }
-          .particle-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-          }
-          .holographic-text {
-            background: linear-gradient(
-              45deg,
-              ${theme === 'dark' ? '#3b82f6, #a855f7' : '#2563eb, #9333ea'}
-            );
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-          }
-        `}
-      </style>
 
       {/* Particle Background */}
       <div className="particle-container">
@@ -195,7 +153,10 @@ const Footer = ({ navigation }) => {
             <motion.a
               href={CONTENT.logo.href}
               className="flex items-center gap-3 holographic-text text-4xl font-extrabold"
-              onClick={() => navigation('/')}
+              onClick={(event) => {
+                event.preventDefault();
+                navigate('/');
+              }}
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -209,7 +170,7 @@ const Footer = ({ navigation }) => {
               {/* {CONTENT.logo.initial} */}
             </motion.a>
             <motion.p
-              className={`text-lg font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
+              className="text-lg font-semibold theme-muted"
               style={{ opacity: glowOpacity }}
             >
               {CONTENT.logo.name}
@@ -229,7 +190,7 @@ const Footer = ({ navigation }) => {
               <motion.a
                 key={index}
                 href={link.href}
-                className={`text-lg ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400' : 'text-gray-800 hover:text-blue-600'} transition-all`}
+                className="text-lg theme-link transition-all"
                 variants={itemVariants}
                 whileHover={{ x: 10, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -252,13 +213,13 @@ const Footer = ({ navigation }) => {
               <motion.a
                 key={index}
                 href={item.href}
-                className={`flex items-center gap-4 text-lg ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400' : 'text-gray-800 hover:text-blue-600'} transition-all`}
+                className="flex items-center gap-4 text-lg theme-link transition-all"
                 variants={itemVariants}
                 whileHover={{ x: 10, scale: 1.05 }}
                 aria-label={item.label}
               >
                 <motion.div variants={iconVariants} whileHover="hover" whileTap="tap">
-                  <item.icon className="text-blue-500" size={24} />
+                  <item.icon size={24} style={{ color: 'var(--accent)' }} />
                 </motion.div>
                 <span>{item.value}</span>
               </motion.a>
@@ -270,9 +231,8 @@ const Footer = ({ navigation }) => {
         <motion.div
           className={`flex ${
             isMobile ? 'flex-col' : 'flex-row'
-          } justify-between items-center mt-16 border-t ${
-            theme === 'dark' ? 'border-blue-900/50' : 'border-blue-200/50'
-          } pt-8 gap-8`}
+          } justify-between items-center mt-16 border-t pt-8 gap-8`}
+          style={{ borderColor: 'var(--border)' }}
           variants={itemVariants}
         >
           <div className="flex gap-6">
@@ -280,9 +240,7 @@ const Footer = ({ navigation }) => {
               <motion.a
                 key={index}
                 href={social.href}
-                className={`p-3 rounded-full futuristic-glow hover-glow ${
-                  theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-                }`}
+                className="p-3 rounded-full futuristic-glow hover-glow"
                 variants={iconVariants}
                 whileHover="hover"
                 whileTap="tap"
@@ -309,7 +267,7 @@ const Footer = ({ navigation }) => {
           animate={{ y: useTransform(scrollYProgress, [0, 1], [0, -20]) }}
           aria-label="Back to top"
         >
-          <FaArrowUp size={24} className="text-white" />
+          <FaArrowUp size={24} style={{ color: 'var(--text-primary)' }} />
         </motion.button>
       </div>
     </motion.footer>
@@ -317,5 +275,7 @@ const Footer = ({ navigation }) => {
 };
 
 export default Footer;
+
+
 
 

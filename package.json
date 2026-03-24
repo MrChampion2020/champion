@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@babel/preset-react": "^7.24.7",
     "@emotion/react": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -20,14 +19,11 @@
     "core-js": "^3.38.1",
     "dotenv": "^16.4.5",
     "engine.io-client": "^6.6.0",
-    "esbuild": "^0.23.1",
-    "eslint": "^9.7",
     "framer-motion": "^11.11.9",
     "fuse.js": "^7.1.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.514.0",
-    "micromatch": "^4.0.8",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -38,42 +34,22 @@
     "react-modal": "^3.16.1",
     "react-responsive": "^10.0.1",
     "react-router-dom": "^6.26.1",
-    "react-scripts": "5.0.1",
     "react-tilt": "^1.0.2",
     "socket.io-client": "^4.8.0",
-    "terser": "^5.4.0",
-    "tsparticles": "^3.8.1",
-    "vite": "^5.4.2",
-    "web-vitals": "^2.1.4",
-    "ws": "^8.18.0"
+    "tsparticles": "^3.8.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "eslint-config-react-app": "^7.0.1",
-    "webpack": "^5.94.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.7.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2",
+    "vite": "^5.4.10"
   }
 }

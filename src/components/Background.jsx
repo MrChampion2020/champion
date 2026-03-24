@@ -30,19 +30,20 @@ const Background = () => {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'black',
-        zIndex: -1,
+        backgroundColor: 'transparent',
+        zIndex: 0,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        pointerEvents: 'none',
       }}
     >
       <h1
         style={{
           fontSize: '80px',
-          fontWeight: 'bold',
+          fontWeight: '800',
           color: 'transparent',
-          textStrokeColor: 'lightblue',
+          textStrokeColor: 'rgba(236, 239, 241, 0.16)',
           textStrokeWidth: '2px',
           textStrokeDasharray: '10',
           textStrokeDashoffset: offset,
@@ -50,8 +51,11 @@ const Background = () => {
           animationDuration: '10s',
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          opacity: 0.55,
           WebkitTextFillColor: 'transparent',
-          WebkitTextStroke: '2px lightblue',
+          WebkitTextStroke: '2px rgba(236, 239, 241, 0.16)',
         }}
       >
         Champion

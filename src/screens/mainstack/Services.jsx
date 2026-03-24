@@ -1,12 +1,11 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Tilt } from 'react-tilt';
 import { Code, Smartphone, Palette, Server, Table, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { ThemeContext } from '../../screens/context/ThemeContext';
-import Particles from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/slim';
+import PageHero from '../../components/PageHero';
+import heroPortrait from '../../assets/me/hero.jpeg';
 
 // Animation Variants
 const containerVariants = {
@@ -74,150 +73,21 @@ const services = [
 ];
 
 const Services = () => {
-  const { theme } = useContext(ThemeContext);
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const [particlesInit, setParticlesInit] = useState(false);
-
-  const initParticles = useCallback(async (engine) => {
-    await loadSlim(engine);
-    setParticlesInit(true);
-  }, []);
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} overflow-x-hidden`}>
-      <style>
-        {`
-          :root {
-            --neon-blue: #3b82f6;
-            --neon-purple: #9333ea;
-          }
-          .dark {
-            --card-bg: rgba(17, 24, 39, 0.7);
-            --text-primary: #ffffff;
-            --text-secondary: #d1d5db;
-            --accent: var(--neon-blue);
-          }
-          .light {
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent: var(--neon-purple);
-          }
-          .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-          }
-          .glow {
-            box-shadow: 0 0 15px var(--accent);
-          }
-          .gradient-text {
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-          }
-          .parallax-bg {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            opacity: 0.1;
-          }
-          .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.1}), rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.1}));
-            overflow: hidden;
-            z-index: 0;
-          }
-          .tech-wheel {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px dashed ${theme === 'dark' ? '#3b82f6' : '#9333ea'};
-            animation: spin 15s linear infinite;
-            opacity: 0.5;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .tech-wheel:nth-child(1) {
-            width: min(300px, 40vw);
-            height: min(300px, 40vw);
-            top: 10%;
-            left: clamp(5%, 15%, 20%);
-            animation-duration: 20s;
-          }
-          .tech-wheel:nth-child(2) {
-            width: min(200px, 30vw);
-            height: min(200px, 30vw);
-            top: 60%;
-            right: clamp(5%, 20%, 25%);
-            animation-duration: 25s;
-            animation-direction: reverse;
-          }
-          .shade-gradient {
-            position: absolute;
-            width: min(400px, 50vw);
-            height: min(400px, 50vw);
-            background: radial-gradient(circle, rgba(${theme === 'dark' ? '59, 130, 246' : '147, 51, 234'}, 0.8), transparent);
-            opacity: 0.4;
-            animation: pulse 10s ease-in-out infinite;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .shade-gradient:nth-child(1) {
-            top: 20%;
-            left: clamp(20%, 30%, 40%);
-            animation-delay: 2s;
-          }
-          .shade-gradient:nth-child(2) {
-            bottom: 15%;
-            right: clamp(15%, 25%, 35%);
-            animation-delay: 5s;
-          }
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 0.4; }
-          }
-          @media (max-width: 640px) {
-            .tech-wheel:nth-child(1) {
-              width: min(200px, 50vw);
-              height: min(200px, 50vw);
-              top: 5%;
-              left: 10%;
-            }
-            .tech-wheel:nth-child(2) {
-              width: min(150px, 40vw);
-              height: min(150px, 40vw);
-              top: 50%;
-              right: 10%;
-            }
-            .shade-gradient {
-              width: min(300px, 70vw);
-              height: min(300px, 70vw);
-            }
-            .shade-gradient:nth-child(1) {
-              top: 15%;
-              left: 20%;
-            }
-            .shade-gradient:nth-child(2) {
-              bottom: 10%;
-              right: 20%;
-            }
-          }
-        `}
-      </style>
+    <div className="theme-page overflow-x-hidden">
       <Navbar />
       {/* Hero Section */}
+      <PageHero
+        eyebrow="Services"
+        title="My Services"
+        description="Discover modern engineering, design, and consulting services built to strengthen your digital presence with scalable architecture, polished interfaces, and dependable delivery."
+        image={heroPortrait}
+        imageAlt="Champion Aden portrait"
+      />
+      {false && (
       <motion.section
         className="relative h-[60vh] flex items-center justify-center overflow-hidden"
         initial={{ opacity: 0 }}
@@ -240,7 +110,7 @@ const Services = () => {
                 size: { value: 3 },
                 move: { speed: 0.5 },
                 links: { enable: true, distance: 150, opacity: 0.4 },
-                color: { value: theme === 'dark' ? '#3b82f6' : '#9333ea' },
+                color: { value: theme === 'dark' ? '#8C6F4E' : '#191970' },
               },
               interactivity: {
                 events: { onHover: { enable: true, mode: 'repulse' } },
@@ -248,10 +118,7 @@ const Services = () => {
             }}
           />
         )}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'rgba(0, 0, 0, 0.5)', zIndex: 1 }}
-        />
+        <div className="theme-hero-scrim" />
         <motion.div
           className="relative z-10 text-center max-w-full px-4"
           variants={containerVariants}
@@ -266,7 +133,7 @@ const Services = () => {
           </motion.h1>
           <motion.p
             className="text-base sm:text-xl md:text-xl max-w-1xl mx-auto "
-            style={{ color: "white", zIndex: 1000, fontWeight: 700,   }}
+            style={{ color: 'var(--brand-surface)', zIndex: 1000, fontWeight: 700 }}
             variants={itemVariants}
 
           >
@@ -274,6 +141,7 @@ const Services = () => {
           </motion.p>
         </motion.div>
       </motion.section>
+      )}
       {/* Services Section */}
       <motion.div
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative overflow-hidden"
@@ -292,7 +160,7 @@ const Services = () => {
               <motion.div
                 variants={itemVariants}
                 className="glass-card rounded-xl p-8 text-center"
-                whileHover={{ y: -10, boxShadow: '0 12px 40px rgba(59, 130, 246, 0.3)' }}
+                whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
                 <motion.div
                   className="mb-4 text-[var(--accent)]"
@@ -307,20 +175,21 @@ const Services = () => {
                 <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
                   {service.longDescription}
                 </p>
-                <motion.button
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full glow"
+                <motion.a
+                  href="/contact#contact-form"
+                  className="theme-button-primary glow px-4 py-2"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Learn More <ArrowRight size={16} className="inline ml-2" />
-                </motion.button>
+                </motion.a>
               </motion.div>
             </Tilt>
           ))}
         </div>
       </motion.div>
       <motion.div
-        className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600 z-50"
+        className="theme-progress-bar fixed bottom-0 left-0 z-50 h-1 w-full"
         style={{ scaleX }}
       />
       <Footer />
@@ -329,3 +198,4 @@ const Services = () => {
 };
 
 export default Services;
+

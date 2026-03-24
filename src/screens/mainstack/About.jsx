@@ -1,20 +1,26 @@
 
-import React, { useContext, useState, useCallback } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { Tilt } from 'react-tilt';
-import { Users, Target, Award, TrendingUp, Quote, Code, Shield, Palette } from 'lucide-react';
+import { Users, Target, Award, TrendingUp, Quote } from 'lucide-react';
+import axios from 'axios';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { ThemeContext } from '../../screens/context/ThemeContext';
-import Particles from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/slim';
-import me from '../../assets/me.jpg';
-import avatar1 from '../../assets/Avatar1.png';
-import avatar2 from '../../assets/Avatar2.png';
-import avatar3 from '../../assets/Avatar3.png';
-import uiux from '../../assets/uiux.jpg';
-import dev from '../../assets/dev.jpg';
-import cyber from '../../assets/cyber.jpg';
+import PageHero from '../../components/PageHero';
+import ReviewSubmissionModal from '../../components/ReviewSubmissionModal';
+import aboutPortrait from '../../assets/me/about.jpeg';
+import heroPortrait from '../../assets/me/hero.jpeg';
+import heroSecPortrait from '../../assets/me/herosec.jpeg';
+import developerPortraitA from '../../assets/me/WhatsApp Image 2026-03-20 at 10.51.14 PM.jpeg';
+import developerPortraitB from '../../assets/me/WhatsApp Image 2026-03-20 at 10.56.41 PM (1).jpeg';
+import API_URL from './config';
+import {
+  formatReviewMonthYear,
+  getReviewAuthor,
+  getReviewContent,
+  getReviewInitials,
+  getReviewRole,
+} from '../../utils/reviews';
 
 // Animation Variants
 const containerVariants = {
@@ -42,51 +48,87 @@ const AnimatedText = ({ text }) => (
   </span>
 );
 
+const CountUpStat = ({ value, suffix = '' }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.6 });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) {
+      return undefined;
+    }
+
+    let frameId = 0;
+    let startTime = 0;
+    const duration = 1400;
+
+    const tick = (timestamp) => {
+      if (!startTime) {
+        startTime = timestamp;
+      }
+
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(value * easedProgress));
+
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isInView, value]);
+
+  return (
+    <span ref={ref}>
+      {count}
+      {suffix}
+    </span>
+  );
+};
+
 const stats = [
-  { icon: <Users size={24} />, title: 'Clients Served', value: '50+' },
-  { icon: <Target size={24} />, title: 'Projects Completed', value: '70+' },
-  { icon: <Award size={24} />, title: 'Years of Experience', value: '7+' },
-  { icon: <TrendingUp size={24} />, title: 'Client Retention', value: '90%' },
+  { icon: <Users size={24} />, title: 'Clients Served', value: 50, suffix: '+' },
+  { icon: <Target size={24} />, title: 'Projects Completed', value: 70, suffix: '+' },
+  { icon: <Award size={24} />, title: 'Years of Experience', value: 7, suffix: '+' },
+  { icon: <TrendingUp size={24} />, title: 'Client Retention', value: 90, suffix: '%' },
 ];
 
 const team = [
   {
-    name: 'Champion Aden',
-    role: 'Full Stack Developer & Cybersecurity Analyst',
-    image: me,
+    caption: 'Full-Stack Delivery',
+    name: 'From idea to production',
+    role: 'Full Stack Engineering',
+    description:
+      'I design and build complete web platforms across frontend, backend, database design, testing, deployment, and post-launch iteration.',
+    image: aboutPortrait,
+    imageClassName: 'cartoon-character--top-focus',
   },
   {
-    name: 'UI/UX Designer',
-    role: 'Creative UI/UX Specialist',
-    image: uiux, // Placeholder for cartoon
+    caption: 'User Experience',
+    name: 'Interfaces people enjoy using',
+    role: 'Frontend and UI Systems',
+    description:
+      'I turn product requirements into clean, responsive interfaces with thoughtful hierarchy, smooth interactions, and practical usability.',
+    image: heroPortrait,
   },
   {
-    name: 'Developer',
-    role: 'Code Wizard',
-    image: dev, // Placeholder for cartoon
+    caption: 'Mobile Products',
+    name: 'Cross-platform app execution',
+    role: 'React Native Development',
+    description:
+      'I ship mobile experiences with real-time features, secure APIs, and scalable architecture that feels polished on both Android and iOS.',
+    image: developerPortraitA,
   },
   {
-    name: 'Cybersecurity',
-    role: 'Security Guardian',
-    image: cyber, // Placeholder for cartoon
-  },
-];
-
-const testimonials = [
-  {
-    quote: 'Champion, your humility and speed are unmatched! You delivered every detail flawlessly.',
-    author: 'Dr. Omoregie, Client',
-    avatar: avatar1,
-  },
-  {
-    quote: 'Is mobile app development this easy? Champion made our vision real in record time!',
-    author: 'Michael Scott, CEO, Scottified',
-    avatar: avatar2,
-  },
-  {
-    quote: 'Champion\'s portfolio site transformed our brand with top-notch TypeScript and React skills!',
-    author: 'Mr. Charles, Founder, Prime Procurement',
-    avatar: avatar3,
+    caption: 'Security Mindset',
+    name: 'Performance with protection',
+    role: 'Cybersecurity and Reliability',
+    description:
+      'I build with authentication, data protection, and risk reduction in mind so products stay fast, resilient, and trustworthy in production.',
+    image: heroSecPortrait,
   },
 ];
 
@@ -106,172 +148,48 @@ const craftedProjects = [
 ];
 
 const About = () => {
-  const { theme } = useContext(ThemeContext);
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const [particlesInit, setParticlesInit] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  const initParticles = useCallback(async (engine) => {
-    await loadSlim(engine);
-    setParticlesInit(true);
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadReviews = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/reviews?limit=6`);
+        const nextReviews = response.data?.reviews ?? [];
+
+        if (!isCancelled) {
+          setReviews(nextReviews);
+        }
+      } catch {
+        if (!isCancelled) {
+          setReviews([]);
+        }
+      }
+    };
+
+    loadReviews();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} overflow-x-hidden`}>
-      <style>
-        {`
-          :root {
-            --neon-blue: #3b82f6;
-            --neon-purple: #9333ea;
-          }
-          .dark {
-            --card-bg: rgba(17, 24, 39, 0.7);
-            --text-primary: #ffffff;
-            --text-secondary: #d1d5db;
-            --accent: var(--neon-blue);
-          }
-          .light {
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent: var(--neon-purple);
-          }
-          .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-          }
-          .glow {
-            box-shadow: 0 0 15px var(--accent);
-          }
-          .gradient-text {
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-          }
-          .parallax-bg {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            opacity: 0.1;
-          }
-          .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.3}), rgba(0, 0, 0, ${theme === 'dark' ? 0.7 : 0.1}));
-            overflow: hidden;
-            z-index: 0;
-          }
-          .tech-wheel {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px dashed ${theme === 'dark' ? '#3b82f6' : '#9333ea'};
-            animation: spin 15s linear infinite;
-            opacity: 0.5;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .tech-wheel:nth-child(1) {
-            width: min(300px, 40vw);
-            height: min(300px, 40vw);
-            top: 10%;
-            left: clamp(5%, 15%, 20%);
-            animation-duration: 20s;
-          }
-          .tech-wheel:nth-child(2) {
-            width: min(200px, 30vw);
-            height: min(200px, 30vw);
-            top: 60%;
-            right: clamp(5%, 20%, 25%);
-            animation-duration: 25s;
-            animation-direction: reverse;
-          }
-          .shade-gradient {
-            position: absolute;
-            width: min(400px, 50vw);
-            height: min(400px, 50vw);
-            background: radial-gradient(circle, rgba(${theme === 'dark' ? '59, 130, 246' : '147, 51, 234'}, 0.3), transparent);
-            opacity: 0.4;
-            animation: pulse 10s ease-in-out infinite;
-            max-width: 100%;
-            max-height: 100%;
-            box-sizing: border-box;
-          }
-          .shade-gradient:nth-child(1) {
-            top: 20%;
-            left: clamp(20%, 30%, 40%);
-            animation-delay: 2s;
-          }
-          .shade-gradient:nth-child(2) {
-            bottom: 15%;
-            right: clamp(15%, 25%, 35%);
-            animation-delay: 5s;
-          }
-          .cartoon-character {
-            width: 150px;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%;
-            margin: 0 auto;
-            transition: transform 0.3s;
-          }
-          .cartoon-uiux {
-            background-image: url('cartoon-uiux.jpg');
-            /* Cartoon: Smiling figure with a palette, wearing a white shirt, blue striped tie, and maroon jacket, holding a sketchpad */
-          }
-          .cartoon-dev {
-            background-image: url('cartoon-dev.jpg');
-            /* Cartoon: Focused figure with glasses, white shirt, blue tie, coding on a laptop, maroon jacket over shoulder */
-          }
-          .cartoon-cyber {
-            background-image: url('cartoon-cyber.jpg');
-            /* Cartoon: Vigilant figure with a shield, white shirt, blue tie, maroon pants, holding a digital lock */
-          }
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.2); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 0.4; }
-          }
-          @media (max-width: 640px) {
-            .tech-wheel:nth-child(1) {
-              width: min(200px, 50vw);
-              height: min(200px, 50vw);
-              top: 5%;
-              left: 10%;
-            }
-            .tech-wheel:nth-child(2) {
-              width: min(150px, 40vw);
-              height: min(150px, 40vw);
-              top: 50%;
-              right: 10%;
-            }
-            .shade-gradient {
-              width: min(300px, 70vw);
-              height: min(300px, 70vw);
-            }
-            .shade-gradient:nth-child(1) {
-              top: 15%;
-              left: 20%;
-            }
-            .shade-gradient:nth-child(2) {
-              bottom: 10%;
-              right: 20%;
-            }
-            .cartoon-character { width: 120px; height: 120px; }
-          }
-        `}
-      </style>
+    <div className="theme-page overflow-x-hidden">
       <Navbar />
       {/* Hero Section */}
+      <PageHero
+        eyebrow="About"
+        title="About Sir Champion"
+        description="Step into a world where code meets creativity and security protects innovation. This journey is shaped by product thinking, clean execution, and measurable digital impact."
+        image={aboutPortrait}
+        imageAlt="Champion Aden portrait"
+      />
+      {false && (
       <motion.section
         className="relative h-[60vh] flex items-center justify-center overflow-hidden"
         initial={{ opacity: 0 }}
@@ -294,7 +212,7 @@ const About = () => {
                 size: { value: 3 },
                 move: { speed: 0.5 },
                 links: { enable: true, distance: 150, opacity: 0.4 },
-                color: { value: theme === 'dark' ? '#3b82f6' : '#9333ea' },
+                color: { value: theme === 'dark' ? '#8C6F4E' : '#191970' },
               },
               interactivity: {
                 events: { onHover: { enable: true, mode: 'repulse' } },
@@ -302,10 +220,7 @@ const About = () => {
             }}
           />
         )}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'rgba(0, 0, 0, 0.5)', zIndex: 1 }}
-        />
+        <div className="theme-hero-scrim" />
         <motion.div
           className="relative z-10 text-center max-w-full px-4"
           variants={containerVariants}
@@ -320,13 +235,14 @@ const About = () => {
           </motion.h1>
           <motion.p
             className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto"
-            style={{ color: "white", fontWeight: 700 }}
+            style={{ color: 'var(--brand-surface)', fontWeight: 700 }}
             variants={itemVariants}
           >
             Step into a world where code meets creativity, and security guards innovation—welcome to my journey!
           </motion.p>
         </motion.div>
       </motion.section>
+      )}
       {/* Bio Section */}
       <motion.section
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 relative"
@@ -373,7 +289,7 @@ const About = () => {
               <motion.div
                 variants={itemVariants}
                 className="glass-card rounded-xl p-6 text-center"
-                whileHover={{ y: -10, boxShadow: '0 12px 40px rgba(59, 130, 246, 0.3)' }}
+                whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
                 <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                   {project.title}
@@ -409,19 +325,27 @@ const About = () => {
             <Tilt key={index} options={{ max: 20, scale: 1.05 }}>
               <motion.div
                 variants={itemVariants}
-                className="glass-card rounded-xl p-6 text-center"
-                whileHover={{ y: -10, boxShadow: '0 12px 40px rgba(59, 130, 246, 0.3)' }}
+                className="glass-card rounded-xl p-6 text-center h-full"
+                whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
-                <div className="cartoon-character" style={{ backgroundImage: member.image.includes('cartoon-') ? `url(${member.image}.jpg)` : `url(${member.image})` }}>
-                  {member.image.includes('cartoon-') && (
-                    <div className={`glow ${member.image === 'cartoon-uiux' ? 'cartoon-uiux' : member.image === 'cartoon-dev' ? 'cartoon-dev' : 'cartoon-cyber'}`} />
-                  )}
-                </div>
+                <div
+                  className={`cartoon-character ${member.imageClassName ?? ''}`.trim()}
+                  style={{ backgroundImage: `url(${member.image})` }}
+                />
+                <p
+                  className="mt-4 text-[11px] font-extrabold uppercase tracking-[0.18em]"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  {member.caption}
+                </p>
                 <h3 className="text-lg sm:text-xl font-bold mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>
                   {member.name}
                 </h3>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
                   {member.role}
+                </p>
+                <p className="mt-3 text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
+                  {member.description}
                 </p>
               </motion.div>
             </Tilt>
@@ -448,7 +372,7 @@ const About = () => {
               <motion.div
                 variants={itemVariants}
                 className="glass-card rounded-xl p-4 sm:p-6 text-center"
-                whileHover={{ y: -10, boxShadow: '0 12px 40px rgba(59, 130, 246, 0.3)' }}
+                whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
                 <motion.div
                   className="mb-2 text-[var(--accent)]"
@@ -457,7 +381,7 @@ const About = () => {
                   {stat.icon}
                 </motion.div>
                 <p className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                  {stat.value}
+                  <CountUpStat value={stat.value} suffix={stat.suffix} />
                 </p>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   {stat.title}
@@ -485,37 +409,68 @@ const About = () => {
         >
           What Clients Say
         </motion.h2>
+        <motion.div
+          className="mb-8 flex justify-center relative z-10"
+          variants={itemVariants}
+        >
+          <motion.button
+            type="button"
+            className="theme-button-secondary px-6 py-3"
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setIsReviewModalOpen(true)}
+          >
+            Add Your Review
+          </motion.button>
+        </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 relative z-10">
-          {testimonials.map((testimonial, index) => (
-            <Tilt key={index} options={{ max: 15, scale: 1.03 }}>
+          {reviews.length ? reviews.map((review) => (
+            <Tilt key={review.id} options={{ max: 15, scale: 1.03 }}>
               <motion.div
                 variants={itemVariants}
                 className="glass-card rounded-xl p-6 sm:p-8"
-                whileHover={{ y: -10, boxShadow: '0 12px 40px rgba(59, 130, 246, 0.3)' }}
+                whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
                 <div className="flex items-center mb-4">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.author}
-                    className="w-10 h-10 rounded-full mr-3 object-cover"
-                  />
+                  <div
+                    className="mr-3 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[rgba(255,255,255,0.08)] text-sm font-extrabold"
+                    style={{ color: 'var(--accent)' }}
+                  >
+                    {getReviewInitials(review)}
+                  </div>
                   <div>
                     <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                      {testimonial.author}
+                      {getReviewAuthor(review)}
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: 'var(--text-secondary)' }}>
+                      {[getReviewRole(review) || 'Client', formatReviewMonthYear(review.createdAt)]
+                        .filter(Boolean)
+                        .join(' | ')}
                     </p>
                   </div>
                 </div>
                 <Quote className="text-[var(--accent)] mb-4" size={24} />
                 <p className="text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
-                  {testimonial.quote}
+                  {getReviewContent(review)}
                 </p>
               </motion.div>
             </Tilt>
-          ))}
+          )) : (
+            <div className="glass-card blog-status-card sm:col-span-2 lg:col-span-3 relative z-10">
+              <p className="theme-muted text-center">
+                Reviews will appear here once approved by admin.
+              </p>
+            </div>
+          )}
         </div>
       </motion.section>
+      <ReviewSubmissionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        reviews={reviews}
+      />
       <motion.div
-        className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600 z-50"
+        className="theme-progress-bar fixed bottom-0 left-0 z-50 h-1 w-full"
         style={{ scaleX }}
       />
       <Footer />
@@ -524,3 +479,4 @@ const About = () => {
 };
 
 export default About;
+

@@ -8,18 +8,17 @@ import { loadSlim } from '@tsparticles/slim';
 import { useMediaQuery } from 'react-responsive';
 import { ThemeContext } from '../screens/context/ThemeContext';
 import logo from '../assets/logo.png';
-import blue from '../assets/blue.jpg';
 
 // Particle Config
 const particleConfig = {
   particles: {
     number: { value: 80 },
     density: { enable: true, area: 800 },
-    color: { value: ['#3b82f6', '#9333ea', '#f43f5e'] },
+    color: { value: ['#191970', '#8C6F4E', '#ECEFF1'] },
     shape: { type: ['circle', 'triangle', 'star'] },
     opacity: { value: { min: 0.3, max: 0.8 } },
     size: { value: { min: 1, max: 4 } },
-    links: { enable: true, distance: 120, color: '#ffffff', opacity: 0.3 },
+    links: { enable: true, distance: 120, color: '#ECEFF1', opacity: 0.24 },
     move: { enable: true, speed: 3, direction: 'none', outModes: 'bounce' },
   },
   interactivity: {
@@ -39,6 +38,7 @@ const navItems = [
   { name: 'Home', path: '/' },
   { name: 'Services', path: '/services' },
   { name: 'Projects', path: '/projects' },
+  { name: 'Blog', path: '/blog' },
   { name: 'About', path: '/about' },
   { name: 'Contact', path: '/contact' },
 ];
@@ -48,6 +48,7 @@ const contentMap = [
   { path: '/', name: 'Home', keywords: ['home', 'welcome','development', 'mobile apps', 'web development', 'react js', 'react', 'portfolio', 'champion aden', 'aden', 'footer', 'blog', 'contact', 'information', 'email', 'phone', 'x'] },
   { path: '/services', name: 'Services', keywords: ['services', 'web development', 'design', 'consulting', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
   { path: '/projects', name: 'Projects', keywords: ['projects', 'work', 'case studies', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
+  { path: '/blog', name: 'Blog', keywords: ['blog', 'techcrunch', 'tech news', 'development news', 'startup news', 'engineering', 'software', 'technology'] },
   { path: '/about', name: 'About', keywords: ['about', 'bio', 'champion aden', 'experience', 'contact', 'information', 'email', 'phone', 'x', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
   { path: '/contact', name: 'Contact', keywords: ['contact', 'get in touch', 'email', 'phone', 'contact', 'information', 'email', 'x', 'development', 'mobile apps', 'web development', 'react js', 'react'] },
 ];
@@ -102,7 +103,7 @@ const Navbar = () => {
   const { scrollY } = useScroll();
   const scaleX = useTransform(scrollY, [0, 1000], [0, 1]);
   const y = useTransform(scrollY, [0, 100], [0, -10]);
-  const opacity = useTransform(scrollY, [0, 100], [1, 0.8]);
+  const opacity = useTransform(scrollY, [0, 100], [1, 0.94]);
   const springY = useSpring(y, { stiffness: 100, damping: 20 });
   const springScaleX = useSpring(scaleX, { stiffness: 100, damping: 20 });
 
@@ -244,145 +245,20 @@ const Navbar = () => {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 w-full z-50 ${theme === 'dark' 
-        ? 'bg-gradient-to-r from-gray-900/40 to-blue-950/40' 
-        : 'bg-gradient-to-r from-gray-50/40 to-blue-100/40'
-      } backdrop-blur-xl border-b border-gray-700/20`}
+      className="fixed top-0 left-0 z-50 w-full theme-nav-shell"
       style={{ y: springY, opacity }}
       initial={{ y: -100, scale: 0.9 }}
       animate={{ y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
     >
-      <style>
-        {`
-          :root {
-            --neon-blue: #3b82f6;
-            --neon-purple: #9333ea;
-            --neon-pink: #f43f5e;
-          }
-          .dark {
-            --bg-primary: rgba(17, 24, 39, 0.8);
-            --text-primary: #ffffff;
-            --accent: var(--neon-blue);
-            --icon-color: #ffffff;
-            --search-bg: rgba(255, 255, 255, 0.15);
-            --search-placeholder: rgba(255, 255, 255, 0.7);
-          }
-          .light {
-            --bg-primary: rgba(255, 255, 255, 0.8);
-            --text-primary: #111827;
-            --accent: var(--neon-purple);
-            --icon-color: #374151;
-            --search-bg: rgba(0, 0, 0, 0.1);
-            --search-placeholder: rgba(0, 0, 0, 0.6);
-          }
-          .holographic-text {
-            background: linear-gradient(45deg, #60a5fa, #c084fc, #fb7185);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 15px rgba(96, 165, 250, 0.8), 0 0 25px rgba(192, 132, 252, 0.6);
-            font-weight: 700;
-          }
-          .futuristic-glow {
-            background: ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.2)' 
-              : 'rgba(147, 51, 234, 0.2)'};
-            box-shadow: 0 0 20px ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.5)' 
-              : 'rgba(147, 51, 234, 0.3)'};
-            border: 1px solid ${theme === 'dark' 
-              ? 'rgba(255, 255, 255, 0.1)' 
-              : 'rgba(0, 0, 0, 0.1)'};
-            backdrop-filter: blur(15px);
-          }
-          .nav-item:hover {
-            transform: translateY(-2px);
-            text-shadow: 0 0 20px var(--accent), 0 0 30px var(--neon-pink);
-          }
-          .mobile-nav-item {
-            box-shadow: 0 0 25px ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.6)' 
-              : 'rgba(147, 51, 234, 0.4)'};
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-          }
-          .mobile-nav-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px ${theme === 'dark' 
-              ? 'rgba(59, 130, 246, 0.8)' 
-              : 'rgba(147, 51, 234, 0.6)'};
-          }
-          .active-nav::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #60a5fa, #c084fc);
-            box-shadow: 0 0 12px #60a5fa, 0 0 20px #c084fc;
-            animation: glow-pulse 2s infinite;
-          }
-          @keyframes glow-pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-          }
-          .search-suggestions {
-            background: var(--bg-primary);
-            border: 2px solid var(--accent);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-          }
-          .search-input {
-            background: var(--search-bg);
-            color: var(--text-primary);
-          }
-          .search-input::placeholder {
-            color: var(--search-placeholder);
-          }
-          .voice-error {
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-          }
-          .icon {
-            color: var(--icon-color);
-          }
-          @media (max-width: 400px) {
-            .mobile-nav-item {
-              font-size: 0.9rem;
-              padding: 0.5rem 1rem;
-            }
-            .mobile-search-input {
-              padding: 0.5rem;
-              font-size: 0.9rem;
-            }
-            .mobile-button {
-              padding: 0.75rem;
-            }
-            .mobile-menu-container {
-              gap: 0.5rem;
-            }
-          }
-        `}
-      </style>
       <Particles
         id="navbar-particles"
         init={particlesInit}
         options={particleConfig}
-        className="absolute inset-0 z-0 opacity-60 pointer-events-auto"
+        className="absolute inset-0 z-0 opacity-60 pointer-events-none"
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <motion.div
             className="flex items-center"
             whileHover={{ scale: 1.15 }}
@@ -407,7 +283,7 @@ const Navbar = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  
+                  Sir Champion
                 </motion.span>
               </button>
             </Tilt>
@@ -422,7 +298,7 @@ const Navbar = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleNavigation(item.path);
                     }}
-                    className={`px-4 py-2 text-base font-semibold holographic-text nav-item futuristic-glow rounded-lg ${
+                    className={`px-4 py-2 text-base nav-item theme-nav-link futuristic-glow rounded-lg ${
                       location.pathname === item.path ? 'active-nav' : ''
                     }`}
                     whileHover={{ scale: 1.1 }}
@@ -497,7 +373,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search site..."
-                className="w-full p-3 pr-10 rounded-full search-input futuristic-glow focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-full p-3 pr-10 search-input"
                 aria-label="Search"
                 animate={isVoiceActive ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ repeat: isVoiceActive ? Infinity : 0, duration: 0.6 }}
@@ -533,7 +409,7 @@ const Navbar = () => {
                 {searchResults.map((result, index) => (
                   <motion.li
                     key={index}
-                    className="px-4 py-3 hover:bg-blue-500/20 cursor-pointer holographic-text"
+                    className="cursor-pointer px-4 py-3 theme-nav-link"
                     onClick={() => handleNavigation(result.path)}
                     whileHover={{ x: 5 }}
                     initial={{ opacity: 0 }}
@@ -551,15 +427,12 @@ const Navbar = () => {
 
       {isMobile && isOpen && (
         <motion.div
-          className={`fixed top-16 left-0 w-full h-[calc(100vh-64px)] ${theme === 'dark' 
-            ? 'bg-gray-900/95' 
-            : 'bg-gray-50/95'
-          } backdrop-blur-2xl z-40`}
+          className="fixed left-0 top-20 z-40 h-[calc(100vh-5rem)] w-full backdrop-blur-2xl"
           variants={menuVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
-          style={{ backgroundImage: `url(${blue})`, backgroundSize: 'cover' }}
+          style={{ background: 'linear-gradient(180deg, var(--nav-shell), var(--bg-secondary))' }}
         >
           <div className="flex flex-col items-center justify-between h-full py-6 mobile-menu-container">
             <div className="flex flex-col items-center flex-grow justify-center space-y-3">
@@ -570,7 +443,7 @@ const Navbar = () => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleNavigation(item.path);
                   }}
-                  className={`text-lg font-bold holographic-text futuristic-glow px-6 py-2.5 rounded-xl mobile-nav-item max-w-xs w-full ${
+                  className={`max-w-xs w-full rounded-xl px-6 py-2.5 text-lg font-bold theme-nav-link futuristic-glow mobile-nav-item ${
                     location.pathname === item.path ? 'active-nav' : ''
                   }`}
                   variants={itemVariants}
@@ -593,7 +466,7 @@ const Navbar = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search site..."
-                  className="w-full p-3 pr-10 rounded-full search-input futuristic-glow focus:ring-2 focus:ring-blue-500 mobile-search-input"
+                  className="mobile-search-input w-full rounded-full p-3 pr-10 search-input"
                   aria-label="Search"
                   animate={isVoiceActive ? { scale: [1, 1.05, 1] } : {}}
                   transition={{ repeat: isVoiceActive ? Infinity : 0, duration: 0.6 }}
@@ -648,9 +521,9 @@ const Navbar = () => {
       )}
 
       <motion.div
-        className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500"
+        className="theme-progress-bar absolute bottom-0 left-0 h-1.5 w-full"
         style={{ scaleX: springScaleX }}
-        animate={{ boxShadow: '0 0 15px rgba(59, 130, 246, 0.8)' }}
+        animate={{ boxShadow: '0 0 18px rgba(140, 111, 78, 0.28)' }}
       />
     </motion.nav>
   );
