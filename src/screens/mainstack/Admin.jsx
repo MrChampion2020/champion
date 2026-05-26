@@ -93,6 +93,10 @@ const Admin = () => {
   const [isPublishingProject, setIsPublishingProject] = useState(false);
   const [isSavingReview, setIsSavingReview] = useState(false);
   const [activeReviewId, setActiveReviewId] = useState(null);
+  const [cvAccessChats, setCvAccessChats] = useState([]);
+  const [cvAccessSetupNotice, setCvAccessSetupNotice] = useState("");
+  const [activeCvChatId, setActiveCvChatId] = useState(null);
+  const [cvAccessError, setCvAccessError] = useState("");
 
   const adminHeaders = useMemo(
     () => ({
@@ -112,17 +116,22 @@ const Admin = () => {
       const requestConfig = {
         headers: getAdminAuthHeaders(tokenToUse),
       };
-      const [submissionsResponse, projectsResponse, reviewsResponse] = await Promise.all([
+      const [submissionsResponse, projectsResponse, reviewsResponse, cvAccessResponse] =
+        await Promise.all([
         axios.get(`${API_URL}/api/admin/submissions?limit=80`, requestConfig),
         axios.get(`${API_URL}/api/admin/projects`, requestConfig),
         axios.get(`${API_URL}/api/admin/reviews`, requestConfig),
+        axios.get(`${API_URL}/api/admin/cv-access/chats`, requestConfig),
       ]);
 
       setSubmissions(submissionsResponse.data?.submissions ?? []);
       setCurrentProjects(projectsResponse.data?.projects ?? []);
       setReviews(reviewsResponse.data?.reviews ?? []);
+      setCvAccessChats(cvAccessResponse.data?.chats ?? []);
       setProjectSetupNotice(projectsResponse.data?.setupMessage || "");
       setReviewSetupNotice(reviewsResponse.data?.setupMessage || "");
+      setCvAccessSetupNotice(cvAccessResponse.data?.setupMessage || "");
+      setCvAccessError("");
       setAdminToken(tokenToUse);
       setAuthError("");
     } catch (error) {
@@ -132,6 +141,8 @@ const Admin = () => {
         setDashboardError("");
         setProjectSetupNotice("");
         setReviewSetupNotice("");
+        setCvAccessSetupNotice("");
+        setCvAccessError("");
         setAuthError(error.response?.data?.error || "Your admin session expired.");
       } else {
         setDashboardError(
@@ -219,8 +230,10 @@ const Admin = () => {
     setSubmissions([]);
     setCurrentProjects([]);
     setReviews([]);
+    setCvAccessChats([]);
     setProjectSetupNotice("");
     setReviewSetupNotice("");
+    setCvAccessSetupNotice("");
     setProjectImageFile(null);
     setProjectImagePreview("");
     setProjectImageInputKey((currentValue) => currentValue + 1);
@@ -232,6 +245,8 @@ const Admin = () => {
     setProjectError("");
     setReviewError("");
     setActiveReviewId(null);
+    setActiveCvChatId(null);
+    setCvAccessError("");
   };
 
   const handleProjectFormChange = (event) => {
@@ -332,6 +347,40 @@ const Admin = () => {
     }
 
     await loadDashboard(adminToken);
+  };
+
+  const handleApproveCvAccess = async (chatId) => {
+    setCvAccessError("");
+    setActiveCvChatId(chatId);
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/admin/cv-access/chats/${chatId}/approve`,
+        {},
+        adminHeaders
+      );
+      const nextChat = response.data?.chat;
+
+      if (nextChat) {
+        setCvAccessChats((currentValue) =>
+          currentValue.map((chat) => (chat.id === chatId ? nextChat : chat))
+        );
+      } else {
+        await reloadDashboard();
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        handleLogout();
+        setAuthError("Your admin session expired. Please sign in again.");
+      } else {
+        setCvAccessError(
+          error.response?.data?.error ||
+            "This CV access request could not be approved."
+        );
+      }
+    } finally {
+      setActiveCvChatId(null);
+    }
   };
 
   const handleReviewSubmit = async (event) => {
@@ -519,6 +568,79 @@ const Admin = () => {
               </div>
             ) : null}
             <div className="space-y-6">
+              <div className="glass-card admin-section-card">
+                <div className="admin-section-header admin-section-header--stacked">
+                  <div>
+                    <span className="admin-section-eyebrow">
+                      <LockKeyhole size={14} />
+                      CV Access Requests
+                    </span>
+                    <h2 className="text-2xl font-bold mt-3" style={{ color: "var(--text-primary)" }}>
+                      Approve protected CV downloads
+                    </h2>
+                  </div>
+                </div>
+                {cvAccessSetupNotice ? (
+                  <p className="theme-muted mt-4">{cvAccessSetupNotice}</p>
+                ) : null}
+                {cvAccessError ? (
+                  <p className="admin-status-error mt-4">{cvAccessError}</p>
+                ) : null}
+                <div className="admin-chat-thread">
+                  {cvAccessChats.length ? (
+                    cvAccessChats.map((chat) => (
+                      <article key={chat.id} className="admin-chat-card">
+                        <div className="admin-chat-card-top">
+                          <div>
+                            <h3 className="admin-chat-name">{chat.requesterEmail}</h3>
+                            <p className="admin-chat-subject">Chat ID: {chat.id}</p>
+                          </div>
+                          <span className="admin-chat-time">
+                            {formatDateTime(chat.createdAt)}
+                          </span>
+                        </div>
+                        <div className="admin-chat-meta">
+                          <span className="theme-chip">{chat.status}</span>
+                          {chat.requesterName ? (
+                            <span className="theme-chip">{chat.requesterName}</span>
+                          ) : null}
+                        </div>
+                        {chat.status === "pending" ? (
+                          <div className="mt-4">
+                            <button
+                              type="button"
+                              className="theme-button-primary px-5 py-3"
+                              disabled={
+                                activeCvChatId === chat.id || Boolean(cvAccessSetupNotice)
+                              }
+                              onClick={() => handleApproveCvAccess(chat.id)}
+                            >
+                              {activeCvChatId === chat.id ? (
+                                <>
+                                  <BrandLoader inline />
+                                  Approving...
+                                </>
+                              ) : (
+                                "Approve and Send Token"
+                              )}
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="admin-chat-message mt-4">
+                            Access approved. The requester can download the CV from their chat
+                            using the issued token.
+                          </p>
+                        )}
+                      </article>
+                    ))
+                  ) : (
+                    <div className="admin-empty-card">
+                      <p>No CV access requests yet.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="glass-card admin-section-card">
                 <div className="admin-section-header">
                   <div>

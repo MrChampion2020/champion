@@ -149,11 +149,6 @@ const Navbar = () => {
     };
   }, [isMobile]);
 
-  // Debug media query
-  useEffect(() => {
-    console.log('Is mobile:', isMobile);
-  }, [isMobile]);
-
   // Close mobile menu on resize
   useEffect(() => {
     if (!isMobile) setIsOpen(false);

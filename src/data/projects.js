@@ -1,15 +1,16 @@
 import aboveLifestyle from '../assets/projects/above.png';
-import aetrustPay from '../assets/projects/aetrust pay.svg';
 import arcticObgyn from '../assets/projects/arcticobgyn.png';
+import auntyB from '../assets/projects/auntyB.png';
 import escrowise from '../assets/projects/escrowise-logo.png';
 import feeda from '../assets/projects/feeda.png';
+import foodhub247 from '../assets/projects/foodhub247.png';
 import kokoletLuxury from '../assets/projects/kokolet.png';
 import linx from '../assets/projects/linx.png';
 import ndozi from '../assets/projects/Ndozi.png';
-import quiickchat from '../assets/projects/quiickchat.png';
 import sangaPay from '../assets/projects/sanga pay.png';
 import tercescrow from '../assets/projects/Tercescrow-Logo-9.png';
 import giftingService from '../assets/projects/The-Gifting-Service.png';
+import verifynin from '../assets/projects/verifynin.png';
 
 export const projects = [
   {
@@ -18,13 +19,6 @@ export const projects = [
       'A real-time social media platform built for community engagement, featuring live feeds, stories, messaging, notifications, secure JWT authentication, and a scalable MERN foundation optimized for performance.',
     image: feeda,
     link: 'https://www.feeda.us',
-  },
-  {
-    title: 'Aetrust Pay',
-    description:
-      'A secure fintech payment and trust platform designed to protect transactions end to end, pairing polished React interfaces with resilient Node.js services and security-first payment workflows.',
-    image: aetrustPay,
-    link: 'https://aetrustpay.com',
   },
   {
     title: 'Escrowise.io',
@@ -56,13 +50,6 @@ export const projects = [
       'A conversion-focused marketing platform developed to strengthen brand visibility through fast React delivery, SEO foundations, lead capture flows, analytics, and polished omni-channel user journeys.',
     image: linx,
     link: 'https://linxdash.com',
-  },
-  {
-    title: 'Quiickchat',
-    description:
-      'A real-time messaging application built with React, Node.js, and WebSockets to deliver secure chat, presence awareness, and responsive communication at scale.',
-    image: quiickchat,
-    link: 'https://quiickchat.com',
   },
   {
     title: 'Sanga Pay',
@@ -99,6 +86,30 @@ export const projects = [
       'A business platform designed to strengthen brand credibility, service discovery, and customer conversion through clear information architecture and dependable web infrastructure.',
     image: ndozi,
     link: 'https://ndozi.com/',
+  },
+  {
+    title: 'VerifyNIN.ng',
+    description:
+      'A secure national identity verification platform for real-time NIN validation across businesses and institutions. Built with HTML, CSS, JavaScript, and PHP with MySQL, including client and admin dashboards, secure authentication, fraud prevention, and mobile-responsive verification flows.',
+    image: verifynin,
+    link: 'https://verifynin.ng',
+    timeline: 'February 2026 – March 2026',
+  },
+  {
+    title: 'FoodHub247.com',
+    description:
+      'A full e-commerce marketplace for dried proteins and food ingredients, engineered with HTML, CSS, JavaScript, and PHP. Delivers catalog browsing, cart and checkout, Paystack and Flutterwave payments, order tracking, affiliate features, and an admin panel for product and order management.',
+    image: foodhub247,
+    link: 'https://foodhub247.com',
+    timeline: 'May 15, 2026 – May 26, 2026',
+  },
+  {
+    title: 'AuntyBCompere.com',
+    description:
+      'A professional service website for AuntyBCompere, a premium Event MC/Compere specializing in corporate events, birthdays, traditional weddings (Alaga Iduro/Ijoko), and luxury Eru-Iyawo packaging. Built from scratch with HTML, CSS, JavaScript, and PHP, featuring elegant UI/UX, client testimonials, contact and inquiry flows, dynamic content management, secure form handling, and mobile-first performance.',
+    image: auntyB,
+    link: 'https://auntybcompere.com/',
+    timeline: 'September 2025 – January 2026',
   },
 ];
 

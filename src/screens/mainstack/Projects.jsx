@@ -47,20 +47,19 @@ const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [currentProjects, setCurrentProjects] = useState([]);
   const [isLoadingCurrentProjects, setIsLoadingCurrentProjects] = useState(true);
-  const [currentProjectsError, setCurrentProjectsError] = useState("");
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   useEffect(() => {
     const loadCurrentProjects = async () => {
       setIsLoadingCurrentProjects(true);
-      setCurrentProjectsError("");
 
       try {
         const response = await axios.get(`${API_URL}/api/projects/current?limit=6`);
         setCurrentProjects(response.data?.projects ?? []);
       } catch (error) {
-        setCurrentProjectsError("Current project updates are unavailable right now.");
+        console.error("Failed to load current projects", error);
+        setCurrentProjects([]);
       } finally {
         setIsLoadingCurrentProjects(false);
       }
@@ -172,6 +171,11 @@ const Projects = () => {
                   >
                     {project.title}
                   </motion.h3>
+                  {project.timeline ? (
+                    <p className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
+                      {project.timeline}
+                    </p>
+                  ) : null}
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {project.description}
                   </p>
@@ -201,9 +205,6 @@ const Projects = () => {
               </p>
             </div>
           </div>
-          {currentProjectsError ? (
-            <p className="admin-status-error mt-6">{currentProjectsError}</p>
-          ) : null}
           {isLoadingCurrentProjects ? (
             <BrandLoader label="Loading current projects" compact className="mt-8" />
           ) : currentProjects.length ? (
@@ -290,6 +291,17 @@ const Projects = () => {
                   >
                     {selectedProject.title}
                   </motion.h3>
+                  {selectedProject.timeline ? (
+                    <motion.p
+                      className="project-timeline mb-4 text-sm font-semibold uppercase tracking-wide"
+                      style={{ color: 'var(--text-secondary)' }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 }}
+                    >
+                      {selectedProject.timeline}
+                    </motion.p>
+                  ) : null}
                   <motion.p
                     className="text-sm md:text-base mb-6"
                     style={{ color: 'var(--text-secondary)' }}

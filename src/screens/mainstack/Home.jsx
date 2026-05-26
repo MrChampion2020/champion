@@ -3,13 +3,12 @@ import { motion, useInView } from "framer-motion";
 import { Instagram, Linkedin, Github, Mail, Phone, MapPin, Clock } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import Background from "../../components/Background";
 import BrandLoader from "../../components/BrandLoader";
+import CvAccessModal from "../../components/CvAccessModal";
 import ReviewSubmissionModal from "../../components/ReviewSubmissionModal";
 import PhoneCountrySelect from "../../components/PhoneCountrySelect";
 import heroPortrait from "../../assets/me/hero.jpeg";
 import aboutPortrait from "../../assets/me/about.jpeg";
-import cvPdf from "../../assets/me/sirchampion.pdf";
 import { useMediaQuery } from "react-responsive";
 import axios from "axios";
 import API_URL from "./config";
@@ -38,10 +37,11 @@ const navItems = [
 // Content Constants
 const CONTENT = {
   hero: {
-    greeting: "Hi, I am",
+    role: "Full Stack Developer",
     name: "Sir Champion Aden",
-    description: "Full Stack Developer crafting scalable web and mobile applications with MERN stack and modern technologies.",
-    hireMe: "Hire Me",
+    description:
+      "I build secure, scalable web and mobile products for teams that need quality without the noise.",
+    hireMe: "Start a project",
     downloadCV: "Download CV",
   },
   about: {
@@ -111,78 +111,6 @@ const CONTENT = {
     },
   },
 };
-
-// Wave Animation Component
-const WaveAnimation = ({ className }) => {
-  return (
-    <motion.svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 400 400"
-      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
-      style={{ maxWidth: "min(400px, 80vw)", maxHeight: "min(400px, 80vw)" }}
-      initial={{ opacity: 0.4, rotate: 0 }}
-      animate={{ opacity: 0.8, rotate: 360 }}
-      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-    >
-      <path
-        d="M200,80 C240,80 270,110 270,150 C270,190 240,220 200,220 C160,220 130,190 130,150 C130,110 160,80 200,80 Z"
-        fill="none"
-        stroke="silver"
-        strokeWidth="1"
-        strokeDasharray="5,5"
-      />
-      <path
-        d="M200,60 C250,60 290,100 290,150 C290,200 250,240 200,240 C150,240 110,200 110,150 C110,100 150,60 200,60 Z"
-        fill="none"
-        stroke="silver"
-        strokeWidth="1"
-      />
-      <path
-        d="M200,40 C260,40 310,90 310,150 C310,210 260,260 200,260 C140,260 90,210 90,150 C90,90 140,40 200,40 Z"
-        fill="none"
-        stroke="silver"
-        strokeWidth="1"
-        strokeDasharray="10,5"
-      />
-    </motion.svg>
-  );
-};
-
-// Profile Wave Animation Component
-const ProfileWave = ({ className }) => (
-  <motion.svg
-    width="100%"
-    height="100%"
-    viewBox="0 0 280 280"
-    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
-    style={{ maxWidth: "min(280px, 60vw)", maxHeight: "min(280px, 60vw)" }}
-    initial={{ opacity: 0.4, rotate: 0 }}
-    animate={{ opacity: 0.8, rotate: 360 }}
-    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-  >
-    <path
-      d="M140,70 C160,70 175,85 175,105 C175,125 160,140 140,140 C120,140 105,125 105,105 C105,85 120,70 140,70 Z"
-      fill="none"
-      stroke="inherit"
-      strokeWidth="1"
-      strokeDasharray="5,5"
-    />
-    <path
-      d="M140,60 C165,95 165,165 185,105 C185,130 165,150 140,150 C115,150 115,135 95,105 C95,80 115,60 140,60 Z"
-      fill="none"
-      stroke="silver"
-      strokeWidth="1"
-    />
-    <path
-      d="M140,50 C170,195 175 195,75 105 C195,135 170,160 135 C190,160 110 135 85,135 85,135 110,105 C85,75 110,50 140,50 Z"
-      fill="none"
-      stroke="grey"
-      strokeWidth="1"
-      strokeDasharray="10,5"
-    />
-  </motion.svg>
-);
 
 // Animation Variants
 const containerVariants = {
@@ -541,7 +469,6 @@ const ContactHeading = ({ text }) => {
 
 // Home Component
 const Home = () => {
-  const { theme } = useContext(ThemeContext);
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   const isTablet = useMediaQuery({ query: "(max-width: 768px)" });
 
@@ -572,6 +499,7 @@ const Home = () => {
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_PHONE_COUNTRY);
   const [reviews, setReviews] = useState([]);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isCvAccessModalOpen, setIsCvAccessModalOpen] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -716,15 +644,6 @@ const Home = () => {
       {/* Hero Section */}
       <Navbar navItems={navItems ?? []} />
       <section className="home-hero relative overflow-hidden">
-        <div className="hero-background">
-          <div className="tech-wheel page-hero-wheel-a"></div>
-          <div className="tech-wheel page-hero-wheel-b"></div>
-          <div className="shade-gradient page-hero-glow-a"></div>
-          <div className="shade-gradient page-hero-glow-b"></div>
-        </div>
-        <div className="home-hero-bg-portrait" aria-hidden="true">
-          <img src={heroPortrait} alt="" />
-        </div>
         <div className="theme-hero-scrim home-hero-overlay" />
         <motion.div
           className="home-hero-grid max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
@@ -732,36 +651,23 @@ const Home = () => {
           initial="hidden"
           animate="visible"
         >
-          <motion.div variants={itemVariants} className="home-hero-copy space-y-8">
+          <motion.div variants={itemVariants} className="home-hero-copy">
+            <span className="home-hero-eyebrow">{CONTENT.hero.role}</span>
             <motion.h1
               variants={itemVariants}
-              className={`font-bold tracking-tight tech-outline ${
-                isMobile ? "text-4xl" : isTablet ? "text-5xl" : "text-6xl"
+              className={`home-hero-title ${
+                isMobile ? "text-4xl sm:text-5xl" : "text-5xl lg:text-6xl"
               }`}
             >
-              <span className="block" style={{ color: theme === "dark" ? "var(--brand-surface)" : "var(--text-secondary)" }}>
-                <TypewriterText text={CONTENT.hero.greeting} delay={100} />
-              </span>
-              <span className="gradient-text block">
-                <TypewriterText text={CONTENT.hero.name} delay={100} />
-              </span>
+              {CONTENT.hero.name}
             </motion.h1>
             <motion.p
               variants={textVariants}
-              className={`theme-muted max-w-3xl ${isMobile ? "text-base" : "text-xl"}`}
-              style={{ fontWeight: 600 }}
+              className="home-hero-lead max-w-xl"
             >
               {CONTENT.hero.description}
             </motion.p>
-            <div className="home-hero-metrics">
-              <span className="home-hero-metric">MERN and React Native</span>
-              <span className="home-hero-metric">Security-first delivery</span>
-              <span className="home-hero-metric">Product and platform builds</span>
-            </div>
-            <motion.div
-              variants={itemVariants}
-              className="home-hero-actions"
-            >
+            <motion.div variants={itemVariants} className="home-hero-actions">
               <motion.a
                 href="contact"
                 className="theme-button-primary px-6 py-3"
@@ -771,64 +677,30 @@ const Home = () => {
               >
                 {CONTENT.hero.hireMe}
               </motion.a>
-              <motion.a
-                href={cvPdf}
-                download="SirChampion-CV.pdf"
+              <motion.button
+                type="button"
                 className="theme-button-secondary px-6 py-3"
                 variants={buttonVariants}
                 whileHover="hover"
                 whileTap="tap"
+                onClick={() => setIsCvAccessModalOpen(true)}
               >
                 {CONTENT.hero.downloadCV}
-              </motion.a>
+              </motion.button>
             </motion.div>
-            <div className="flex space-x-6">
-              <motion.a
-                href="https://www.instagram.com/sirchampio_n/"
-                variants={iconVariants}
-                whileHover="hover"
-                className="social-icon"
-              >
-                <Instagram className="h-6 w-6" />
-              </motion.a>
-              <motion.a
-                href="https://www.linkedin.com/in/sirchampion/"
-                variants={iconVariants}
-                whileHover="hover"
-                className="social-icon"
-              >
-                <Linkedin className="h-6 w-6" />
-              </motion.a>
-              <motion.a
-                href="https://github.com/MrChampion2020"
-                variants={iconVariants}
-                whileHover="hover"
-                className="social-icon"
-              >
-                <Github className="h-6 w-6" />
-              </motion.a>
-            </div>
           </motion.div>
           <motion.div
             variants={imageVariants}
-            whileHover="hover"
-            className="home-hero-visual"
+            className="home-hero-visual hidden lg:block"
+            aria-hidden="true"
           >
-            <div className="home-hero-portrait-card glass-card">
-              <WaveAnimation className="absolute inset-0 scale-110 opacity-70" />
-              <ProfileWave className="absolute inset-0 scale-105 opacity-60" />
-              <img
-                src={heroPortrait}
-                alt="Champion Aden"
-                className="home-hero-portrait"
-              />
-            </div>
-            <span className="home-hero-badge home-hero-badge--under-image">
-              Full Stack Developer | Cybersecurity Analyst
-            </span>
+            <img
+              src={heroPortrait}
+              alt=""
+              className="home-hero-portrait"
+            />
           </motion.div>
         </motion.div>
-        <Background />
       </section>
 
       {/* About Me Section */}
@@ -904,6 +776,11 @@ const Home = () => {
                   <motion.h3 variants={textVariants} className="mb-2 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
                     {project.title}
                   </motion.h3>
+                  {project.timeline ? (
+                    <motion.p variants={textVariants} className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
+                      {project.timeline}
+                    </motion.p>
+                  ) : null}
                   <motion.p variants={textVariants} className="home-project-description theme-muted mb-4 text-sm">
                     {project.description}
                   </motion.p>
@@ -961,6 +838,11 @@ const Home = () => {
                   <motion.h3 variants={textVariants} className="mb-2 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
                     {item.title}
                   </motion.h3>
+                  {item.timeline ? (
+                    <motion.p variants={textVariants} className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
+                      {item.timeline}
+                    </motion.p>
+                  ) : null}
                   <motion.p variants={textVariants} className="home-project-description theme-muted mb-4 text-sm">
                     {item.description}
                   </motion.p>
@@ -1070,6 +952,10 @@ const Home = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         reviews={reviews}
+      />
+      <CvAccessModal
+        isOpen={isCvAccessModalOpen}
+        onClose={() => setIsCvAccessModalOpen(false)}
       />
 
       {/* Contact Section */}
