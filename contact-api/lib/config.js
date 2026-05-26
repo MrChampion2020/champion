@@ -2,6 +2,40 @@ function firstDefinedValue(values) {
   return values.find((value) => typeof value === "string" && value.trim()) || "";
 }
 
+function assertSupabaseServerKey(key) {
+  if (key.startsWith("sb_publishable_")) {
+    throw new Error(
+      "SUPABASE_SECRET_KEY is using a publishable key. Use a Supabase secret key (sb_secret_...) or a legacy service_role key for this server route."
+    );
+  }
+
+  if (!key.startsWith("eyJ")) {
+    return;
+  }
+
+  try {
+    const payloadSegment = key.split(".")[1];
+
+    if (!payloadSegment) {
+      return;
+    }
+
+    const payload = JSON.parse(
+      Buffer.from(payloadSegment, "base64url").toString("utf8")
+    );
+
+    if (payload?.role === "anon") {
+      throw new Error(
+        "SUPABASE_SECRET_KEY is using an anon key. Use a Supabase secret key (sb_secret_...) or a legacy service_role key for this server route."
+      );
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("SUPABASE_SECRET_KEY")) {
+      throw error;
+    }
+  }
+}
+
 function ensureRequiredConfig(config, requiredKeys) {
   const missingKeys = requiredKeys.filter((key) => !config[key]);
 
@@ -34,11 +68,7 @@ export function getSupabaseConfig() {
 
   ensureRequiredConfig(config, ["supabaseUrl", "supabaseSecretKey"]);
 
-  if (config.supabaseSecretKey.startsWith("sb_publishable_")) {
-    throw new Error(
-      "SUPABASE_SECRET_KEY is using a publishable key. Use a Supabase secret key (sb_secret_...) or a legacy service_role key for this server route."
-    );
-  }
+  assertSupabaseServerKey(config.supabaseSecretKey);
 
   return config;
 }
@@ -50,6 +80,22 @@ export function getDataTableConfig() {
     currentProjectsTable:
       process.env.SUPABASE_CURRENT_PROJECTS_TABLE || "current_projects",
     reviewsTable: process.env.SUPABASE_REVIEWS_TABLE || "reviews",
+    cvAccessChatsTable:
+      process.env.SUPABASE_CV_ACCESS_CHATS_TABLE || "cv_access_chats",
+    cvAccessMessagesTable:
+      process.env.SUPABASE_CV_ACCESS_MESSAGES_TABLE || "cv_access_messages",
+  };
+}
+
+export function getCvAccessConfig() {
+  return {
+    pdfPath:
+      firstDefinedValue([process.env.CV_PDF_PATH]) ||
+      "private/sirchampion.pdf",
+    tokenTtlHours: Math.min(
+      Math.max(parseIntegerWithFallback(process.env.CV_ACCESS_TOKEN_TTL_HOURS, 72), 1),
+      168
+    ),
   };
 }
 

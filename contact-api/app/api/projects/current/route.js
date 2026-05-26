@@ -2,7 +2,6 @@ import { getDataTableConfig } from "../../../../lib/config";
 import { json, optionsResponse } from "../../../../lib/http";
 import {
   getSupabaseAdminClient,
-  isMissingSupabaseTableError,
 } from "../../../../lib/supabase";
 
 export const runtime = "nodejs";
@@ -48,24 +47,10 @@ export async function GET(request) {
     if (error) {
       console.error("Failed to load current projects", error);
 
-      if (isMissingSupabaseTableError(error)) {
-        return json(request, {
-          ok: true,
-          projects: [],
-          setupRequired: true,
-          setupMessage: `Supabase table "${currentProjectsTable}" has not been created yet.`,
-        });
-      }
-
-      return json(
-        request,
-        {
-          error: "Failed to load current projects.",
-          details:
-            process.env.NODE_ENV === "production" ? undefined : error.message,
-        },
-        { status: 500 }
-      );
+      return json(request, {
+        ok: true,
+        projects: [],
+      });
     }
 
     return json(request, {
@@ -74,18 +59,9 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error("Public current projects API error", error);
-    return json(
-      request,
-      {
-        error: "Current projects service is unavailable.",
-        details:
-          process.env.NODE_ENV === "production"
-            ? undefined
-            : error instanceof Error
-              ? error.message
-              : String(error),
-      },
-      { status: 500 }
-    );
+    return json(request, {
+      ok: true,
+      projects: [],
+    });
   }
 }

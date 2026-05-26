@@ -6,7 +6,7 @@ import {
   verifyPassword,
 } from "../../../../lib/adminAuth";
 import { json, optionsResponse } from "../../../../lib/http";
-import { getSupabaseAdminClient, isMissingSupabaseTableError } from "../../../../lib/supabase";
+import { getSupabaseAdminClient, isMissingSupabaseTableError, getSupabaseQueryErrorMessage } from "../../../../lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,16 +21,31 @@ export async function OPTIONS(request) {
 }
 
 export async function GET(request) {
-  const authResult = await requireAdminSession(request);
+  try {
+    const authResult = await requireAdminSession(request);
 
-  if (authResult.response) {
-    return authResult.response;
+    if (authResult.response) {
+      return authResult.response;
+    }
+
+    return json(request, {
+      ok: true,
+      admin: authResult.admin,
+    });
+  } catch (error) {
+    console.error("Admin session GET API error", error);
+    return json(
+      request,
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Admin authentication service is unavailable.",
+        setupRequired: true,
+      },
+      { status: 500 }
+    );
   }
-
-  return json(request, {
-    ok: true,
-    admin: authResult.admin,
-  });
 }
 
 export async function POST(request) {
@@ -74,7 +89,10 @@ export async function POST(request) {
       console.error("Failed to load admin account", error);
       return json(
         request,
-        { error: "Admin login service is unavailable." },
+        {
+          error: getSupabaseQueryErrorMessage(error, adminUsersTable),
+          setupRequired: true,
+        },
         { status: 500 }
       );
     }
@@ -113,7 +131,11 @@ export async function POST(request) {
     return json(
       request,
       {
-        error: "Admin login service is unavailable.",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Admin login service is unavailable.",
+        setupRequired: true,
         details:
           process.env.NODE_ENV === "production"
             ? undefined

@@ -7,7 +7,9 @@ import {
 import { getAdminSessionConfig, getDataTableConfig } from "./config";
 import { json } from "./http";
 import {
+  getMissingSupabaseTableMessage,
   getSupabaseAdminClient,
+  getSupabaseQueryErrorMessage,
   isMissingSupabaseTableError,
 } from "./supabase";
 
@@ -188,7 +190,7 @@ export async function getAuthenticatedAdmin(request) {
     return {
       admin: null,
       status: 500,
-      message: "Admin authentication service is unavailable.",
+      message: getSupabaseQueryErrorMessage(error, adminUsersTable),
     };
   }
 

@@ -37,10 +37,43 @@ create table if not exists public.reviews (
   is_published boolean not null default false
 );
 
+create table if not exists public.cv_access_chats (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  requester_email text not null,
+  requester_name text not null default '',
+  status text not null default 'pending' check (status in ('pending', 'approved', 'denied')),
+  access_token text unique,
+  token_expires_at timestamptz,
+  approved_at timestamptz
+);
+
+create table if not exists public.cv_access_messages (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  chat_id uuid not null references public.cv_access_chats(id) on delete cascade,
+  sender_role text not null check (sender_role in ('user', 'admin', 'system')),
+  sender_label text not null default '',
+  content text not null
+);
+
+create index if not exists cv_access_messages_chat_id_idx
+  on public.cv_access_messages (chat_id, created_at);
+
+create index if not exists cv_access_chats_status_idx
+  on public.cv_access_chats (status, created_at desc);
+
 grant usage on schema public to anon, authenticated, service_role;
+grant all privileges on table public.contact_messages to service_role;
+grant all privileges on table public.admin_users to service_role;
+grant all privileges on table public.current_projects to service_role;
 grant all privileges on table public.reviews to service_role;
+grant all privileges on table public.cv_access_chats to service_role;
+grant all privileges on table public.cv_access_messages to service_role;
 grant select, insert, update, delete on table public.reviews to anon, authenticated;
-grant usage, select on sequence public.reviews_id_seq to anon, authenticated, service_role;
+grant select, insert on table public.cv_access_chats to anon, authenticated;
+grant select, insert on table public.cv_access_messages to anon, authenticated;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
 
 insert into public.reviews (
   author_name,

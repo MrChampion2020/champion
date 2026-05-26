@@ -12,6 +12,7 @@ Small Next.js API service for the portfolio contact form.
 - exposes admin-protected routes for publishing and moderating reviews
 - exposes a public route for reading current projects on the portfolio
 - exposes a public route for reading published public reviews on the portfolio
+- protects the CV behind admin-approved access tokens and a request chat flow
 - proxies the TechCrunch RSS feed for the blog screen
 - runs cleanly on Vercel
 
@@ -37,6 +38,10 @@ Copy `.env.example` and fill in:
 - `SUPABASE_ADMIN_USERS_TABLE`
 - `SUPABASE_CURRENT_PROJECTS_TABLE`
 - `SUPABASE_REVIEWS_TABLE`
+- `SUPABASE_CV_ACCESS_CHATS_TABLE`
+- `SUPABASE_CV_ACCESS_MESSAGES_TABLE`
+- `CV_PDF_PATH`
+- `CV_ACCESS_TOKEN_TTL_HOURS`
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 - `CONTACT_TO_EMAIL`
@@ -120,7 +125,21 @@ SUPABASE_CONTACT_TABLE=contact_messages
 SUPABASE_ADMIN_USERS_TABLE=admin_users
 SUPABASE_CURRENT_PROJECTS_TABLE=current_projects
 SUPABASE_REVIEWS_TABLE=reviews
+SUPABASE_CV_ACCESS_CHATS_TABLE=cv_access_chats
+SUPABASE_CV_ACCESS_MESSAGES_TABLE=cv_access_messages
+CV_PDF_PATH=private/sirchampion.pdf
+CV_ACCESS_TOKEN_TTL_HOURS=72
 ```
+
+## Protected CV access
+
+The portfolio CV is no longer bundled in the frontend. Visitors start a chat request from the home page, and an admin approves the request to issue a one-time download token.
+
+Place the PDF at `contact-api/private/sirchampion.pdf` or set `CV_PDF_PATH` to another readable path on the server.
+
+When an admin approves a request, the API auto-replies in the chat with the requester's email as the username, the chat ID, and the access token.
+
+Create the CV access tables with the SQL in [supabase/schema.sql](./supabase/schema.sql).
 
 ## Admin routes
 
@@ -135,6 +154,8 @@ Admin login now uses a real database-backed `admin_users` table plus a signed se
 - `GET /api/admin/reviews`
 - `POST /api/admin/reviews`
 - `PATCH /api/admin/reviews/:id`
+- `GET /api/admin/cv-access/chats`
+- `POST /api/admin/cv-access/chats/:chatId/approve`
 
 The provided schema seeds a first admin account:
 
@@ -146,6 +167,10 @@ The provided schema seeds a first admin account:
 - `GET /api/projects/current`
 - `GET /api/reviews`
 - `GET /api/blogs/techcrunch`
+- `POST /api/cv-access/chats`
+- `GET /api/cv-access/chats/:chatId`
+- `POST /api/cv-access/chats/:chatId/messages`
+- `GET /api/cv-access/download?token=`
 
 ## Cloudinary project images
 

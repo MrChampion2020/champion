@@ -6,6 +6,7 @@ import { reviewSelectFields, toReviewPayload } from "../../../lib/reviews";
 import {
   getMissingSupabaseTableMessage,
   getSupabaseAdminClient,
+  getSupabaseQueryErrorMessage,
   isMissingSupabaseTableError,
 } from "../../../lib/supabase";
 
@@ -61,7 +62,8 @@ export async function GET(request) {
       return json(
         request,
         {
-          error: "Failed to load reviews.",
+          error: getSupabaseQueryErrorMessage(error, reviewsTable),
+          setupRequired: true,
           details:
             process.env.NODE_ENV === "production" ? undefined : error.message,
         },
