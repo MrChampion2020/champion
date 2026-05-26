@@ -25,8 +25,23 @@ If this repo is connected to Vercel:
 1. Create a new Vercel project.
 2. Select this repository.
 3. Set the Root Directory to `contact-api`.
-4. Add the environment variables from `.env.example`.
-5. Deploy.
+4. Set Framework Preset to **Next.js** (not Vite).
+5. Leave **Output Directory** empty. Do not use `dist` — that setting is for the portfolio frontend only.
+6. Add the environment variables from `.env.example`.
+7. Deploy.
+
+This folder includes its own `vercel.json` so Vercel treats the project as Next.js instead of the root Vite app.
+
+### If deploy fails with "No Output Directory named dist"
+
+Your Vercel project is using the frontend build settings. In **Project Settings → Build & Development Settings**:
+
+- Root Directory: `contact-api`
+- Framework Preset: `Next.js`
+- Output Directory: clear the field (blank)
+- Build Command: `yarn build` or leave default
+
+Then redeploy.
 
 ## Required environment variables
 
