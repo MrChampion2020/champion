@@ -147,10 +147,10 @@ const Projects = () => {
         />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
           {projects.map((project) => (
-            <Tilt key={project.title} options={{ max: 20, scale: 1.05, perspective: 1000 }}>
+            <Tilt key={project.title} className="h-full" options={{ max: 20, scale: 1.05, perspective: 1000 }}>
               <motion.div
                 variants={itemVariants}
-                className="glass-card rounded-xl overflow-hidden cursor-pointer"
+                className="glass-card rounded-xl overflow-hidden cursor-pointer h-full flex flex-col"
                 onClick={() => setSelectedProject(project)}
                 whileHover={{ y: -10, boxShadow: 'var(--shadow-lifted)' }}
               >
@@ -163,7 +163,7 @@ const Projects = () => {
                     transition={{ duration: 0.3 }}
                   />
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-1">
                   <motion.h3
                     className="text-xl font-bold mb-2"
                     style={{ color: 'var(--text-primary)' }}
