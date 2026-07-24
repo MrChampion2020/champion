@@ -10,7 +10,7 @@ import ndozi from '../assets/projects/Ndozi.png';
 import sangaPay from '../assets/projects/sanga pay.png';
 import tercescrow from '../assets/projects/Tercescrow-Logo-9.png';
 import giftingService from '../assets/projects/The-Gifting-Service.png';
-import verifynin from '../assets/projects/verifynin.png';
+// import verifynin from '../assets/projects/verifynin.png';
 
 export const projects = [
   {
@@ -87,14 +87,14 @@ export const projects = [
     image: ndozi,
     link: 'https://ndozi.com/',
   },
-  {
-    title: 'VerifyNIN.ng',
-    description:
-      'A secure national identity verification platform for real-time NIN validation across businesses and institutions. Built with HTML, CSS, JavaScript, and PHP with MySQL, including client and admin dashboards, secure authentication, fraud prevention, and mobile-responsive verification flows.',
-    image: verifynin,
-    link: 'https://verifynin.ng',
-    timeline: 'February 2026 – March 2026',
-  },
+  // {
+  //   title: 'VerifyNIN.ng',
+  //   description:
+  //     'A secure national identity verification platform for real-time NIN validation across businesses and institutions. Built with HTML, CSS, JavaScript, and PHP with MySQL, including client and admin dashboards, secure authentication, fraud prevention, and mobile-responsive verification flows.',
+  //   image: verifynin,
+  //   link: 'https://verifynin.ng',
+  //   timeline: 'February 2026 – March 2026',
+  // },
   {
     title: 'FoodHub247.com',
     description:
