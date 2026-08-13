@@ -25,7 +25,12 @@ const CONTENT = {
   contact: {
     title: 'Contact Information',
     items: [
-      { icon: FaMapMarkerAlt, label: 'Address', value: '126, Addo Road Ajah, Lagos, Nigeria', href: '#' },
+      {
+        icon: FaMapMarkerAlt,
+        label: 'Address',
+        value: 'Plot 15 Unity Avenue Estate Ajah Lagos Nigeria',
+        href: '#',
+      },
       { icon: FaPhoneAlt, label: 'Phone', value: '+2349030155327', href: 'tel:+2349030155327' },
       { icon: FaEnvelope, label: 'Email', value: 'champion@feeda.us', href: 'mailto:champion@feeda.us' },
       { icon: FaGlobe, label: 'Website', value: 'champion.feeda.us', href: 'https://champion.feeda.us' },

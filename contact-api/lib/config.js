@@ -91,7 +91,7 @@ export function getCvAccessConfig() {
   return {
     pdfPath:
       firstDefinedValue([process.env.CV_PDF_PATH]) ||
-      "private/sirchampion.pdf",
+      "../src/assets/me/Sir_Champion_Aden.pdf",
     tokenTtlHours: Math.min(
       Math.max(parseIntegerWithFallback(process.env.CV_ACCESS_TOKEN_TTL_HOURS, 72), 1),
       168

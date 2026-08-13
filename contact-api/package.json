@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "restore-schema": "node scripts/restore-schema.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
@@ -14,5 +15,8 @@
     "react-dom": "^18.3.1",
     "resend": "^2.0.0",
     "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "pg": "^8.23.0"
   }
 }

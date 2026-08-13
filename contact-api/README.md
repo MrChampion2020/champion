@@ -142,7 +142,7 @@ SUPABASE_CURRENT_PROJECTS_TABLE=current_projects
 SUPABASE_REVIEWS_TABLE=reviews
 SUPABASE_CV_ACCESS_CHATS_TABLE=cv_access_chats
 SUPABASE_CV_ACCESS_MESSAGES_TABLE=cv_access_messages
-CV_PDF_PATH=private/sirchampion.pdf
+CV_PDF_PATH=../src/assets/me/Sir_Champion_Aden.pdf
 CV_ACCESS_TOKEN_TTL_HOURS=72
 ```
 
@@ -150,7 +150,7 @@ CV_ACCESS_TOKEN_TTL_HOURS=72
 
 The portfolio CV is no longer bundled in the frontend. Visitors start a chat request from the home page, and an admin approves the request to issue a one-time download token.
 
-Place the PDF at `contact-api/private/sirchampion.pdf` or set `CV_PDF_PATH` to another readable path on the server.
+Place the PDF at `src/assets/me/Sir_Champion_Aden.pdf` or set `CV_PDF_PATH` to another readable path on the server.
 
 When an admin approves a request, the API auto-replies in the chat with the requester's email as the username, the chat ID, and the access token.
 

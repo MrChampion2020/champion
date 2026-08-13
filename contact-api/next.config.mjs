@@ -7,7 +7,7 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   outputFileTracingRoot: projectRoot,
   outputFileTracingIncludes: {
-    "/api/cv-access/download": ["./private/sirchampion.pdf"],
+    "/api/cv-access/download": ["../src/assets/me/Sir_Champion_Aden.pdf"],
   },
 };
 

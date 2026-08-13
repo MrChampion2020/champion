@@ -563,7 +563,7 @@ const Contact = () => {
                   {
                     icon: <MapPin />,
                     title: "Location",
-                    value: "Ajah, Lagos, Nigeria",
+                    value: "Plot 15 Unity Avenue Estate Ajah Lagos Nigeria",
                   },
                   {
                     icon: <Clock />,

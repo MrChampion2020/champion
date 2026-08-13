@@ -10,9 +10,26 @@ import ndozi from '../assets/projects/Ndozi.png';
 import sangaPay from '../assets/projects/sanga pay.png';
 import tercescrow from '../assets/projects/Tercescrow-Logo-9.png';
 import giftingService from '../assets/projects/The-Gifting-Service.png';
+import ksound from '../assets/projects/KSP.png';
+import faura from '../assets/projects/faura.png';
 // import verifynin from '../assets/projects/verifynin.png';
 
 export const projects = [
+  {
+    title: 'Ksound',
+    description:
+      'A full audio streaming ecosystem built from scratch — dedicated streamer, uploader, and admin dashboards engineered for content publishing, catalog management, and platform operations.',
+    image: ksound,
+    link: 'https://ksound.live',
+    timeline: 'June 2026 – July 2026',
+  },
+  {
+    title: 'Faura',
+    description:
+      'An AI-powered fashion discovery platform where a trained model scans outfits and images to identify fashion items, then surfaces matching pieces to shop instantly — blending computer vision with a seamless retail experience.',
+    image: faura,
+    link: 'https://faura.io/',
+  },
   {
     title: 'Feeda.us',
     description:
@@ -113,5 +130,4 @@ export const projects = [
   },
 ];
 
-export const featuredProjects = projects.slice(0, 3);
-export const portfolioProjects = projects.slice(3, 6);
+export const homeProjects = projects.slice(0, 6);

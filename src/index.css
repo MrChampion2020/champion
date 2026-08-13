@@ -844,9 +844,31 @@ code {
 
 .home-hero-title {
   font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
   color: var(--text-primary);
+}
+
+.home-hero-decor {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-hero-wheel {
+  width: min(30rem, 70vw);
+  height: min(30rem, 70vw);
+  top: -12%;
+  right: -8%;
+}
+
+.home-hero-glow {
+  width: min(22rem, 55vw);
+  height: min(22rem, 55vw);
+  bottom: -14%;
+  left: -8%;
 }
 
 .home-hero-lead {
@@ -873,6 +895,11 @@ code {
   box-shadow: var(--shadow-lifted);
 }
 
+.home-hero-portrait-tilt {
+  display: block;
+  border-radius: 1.5rem;
+}
+
 .project-image-shell {
   display: flex;
   align-items: center;
@@ -890,15 +917,14 @@ code {
   padding: 1rem;
 }
 
-.home-project-grid {
-  max-width: 68rem;
+.home-projects-grid {
+  max-width: 72rem;
   margin: 0 auto;
 }
 
 .home-project-card {
   width: 100%;
-  max-width: 22rem;
-  margin: 0 auto;
+  height: 100%;
 }
 
 .home-project-card-body {
@@ -907,6 +933,69 @@ code {
 
 .home-project-description {
   line-height: 1.7;
+}
+
+.home-section-eyebrow {
+  display: block;
+  text-align: center;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.home-projects-decor {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-projects-wheel {
+  width: min(26rem, 60vw);
+  height: min(26rem, 60vw);
+  top: -10%;
+  right: -6%;
+}
+
+.home-projects-glow-a {
+  width: min(20rem, 50vw);
+  height: min(20rem, 50vw);
+  bottom: -12%;
+  left: -6%;
+}
+
+.home-projects-glow-b {
+  width: min(14rem, 36vw);
+  height: min(14rem, 36vw);
+  top: 22%;
+  left: 42%;
+}
+
+.home-project-tilt {
+  display: block;
+  height: 100%;
+}
+
+.home-project-badge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--brand-primary), var(--accent));
+  color: var(--button-text);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-soft);
 }
 
 .admin-login-card,
@@ -1561,14 +1650,6 @@ code {
 .about-underline:hover::after {
   left: 0;
   width: 100%;
-}
-
-.portfolio-3d {
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(16px);
 }
 
 .tech-outline {

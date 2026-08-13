@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { Tilt } from "react-tilt";
 import { Instagram, Linkedin, Github, Mail, Phone, MapPin, Clock } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -13,7 +14,7 @@ import { useMediaQuery } from "react-responsive";
 import axios from "axios";
 import API_URL from "./config";
 import { ThemeContext } from "../../screens/context/ThemeContext";
-import { featuredProjects, portfolioProjects } from "../../data/projects";
+import { homeProjects } from "../../data/projects";
 import { DEFAULT_PHONE_COUNTRY } from "../../data/phoneCountries";
 import { buildInternationalPhoneNumber, isValidPhoneNumber } from "../../utils/phoneValidation";
 import {
@@ -29,7 +30,6 @@ const navItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "about" },
   { label: "Projects", href: "projects" },
-  { label: "Portfolio", href: "portfolio" },
   { label: "Testimonials", href: "testimonials" },
   { label: "Contact", href: "contact" },
 ];
@@ -65,12 +65,8 @@ const CONTENT = {
     ],
   },
   projects: {
-    title: "Featured Projects",
-    items: featuredProjects,
-  },
-  portfolio: {
-    title: "Portfolio",
-    items: portfolioProjects,
+    title: "Projects",
+    items: homeProjects,
   },
   testimonials: {
     title: "What Clients Say",
@@ -105,7 +101,10 @@ const CONTENT = {
       title: "Contact Information",
       email: { label: "Email", value: "champion@feeda.us" },
       phone: { label: "Phone", value: "+2349030155327" },
-      address: { label: "Address", value: "101, Ajah, Lagos, Nigeria" },
+      address: {
+        label: "Address",
+        value: "Plot 15 Unity Avenue Estate Ajah Lagos Nigeria",
+      },
       availability: { label: "Availability", value: "Open to work" },
       followMe: "Follow Me",
     },
@@ -349,40 +348,6 @@ const ProjectsHeading = ({ text }) => {
           background: "linear-gradient(45deg, transparent, rgba(140, 111, 78, 0.22), transparent)",
           filter: "blur(5px)",
         }}
-      />
-    </motion.h2>
-  );
-};
-
-const PortfolioHeading = ({ text }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.4 });
-  const { theme } = useContext(ThemeContext);
-
-  return (
-    <motion.h2
-      ref={ref}
-      variants={itemVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      className="portfolio-3d relative mb-12 mx-auto w-fit px-6 py-3 text-center text-2xl font-bold sm:text-3xl lg:text-4xl"
-      aria-label={text}
-      whileHover={{ rotateX: 10, rotateY: 10 }}
-      style={{ perspective: "1000px" }}
-    >
-      <span className="gradient-text inline-block">{text}</span>
-      <motion.span
-        className="absolute inset-0 border-2 border-transparent"
-        initial={{ borderColor: "transparent" }}
-        animate={{
-          borderColor: [
-            "transparent",
-            `rgba(${theme === "dark" ? "140, 111, 78" : "25, 25, 112"}, 0.35)`,
-            "transparent",
-          ],
-        }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        style={{ borderRadius: "8px" }}
       />
     </motion.h2>
   );
@@ -644,6 +609,10 @@ const Home = () => {
       {/* Hero Section */}
       <Navbar navItems={navItems ?? []} />
       <section className="home-hero relative overflow-hidden">
+        <div className="home-hero-decor" aria-hidden="true">
+          <div className="tech-wheel home-hero-wheel" />
+          <div className="shade-gradient home-hero-glow" />
+        </div>
         <div className="theme-hero-scrim home-hero-overlay" />
         <motion.div
           className="home-hero-grid max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
@@ -656,7 +625,7 @@ const Home = () => {
             <motion.h1
               variants={itemVariants}
               className={`home-hero-title ${
-                isMobile ? "text-4xl sm:text-5xl" : "text-5xl lg:text-6xl"
+                isMobile ? "text-4xl sm:text-5xl" : "text-6xl lg:text-7xl"
               }`}
             >
               {CONTENT.hero.name}
@@ -694,11 +663,99 @@ const Home = () => {
             className="home-hero-visual hidden lg:block"
             aria-hidden="true"
           >
-            <img
-              src={heroPortrait}
-              alt=""
-              className="home-hero-portrait"
-            />
+            <Tilt
+              className="home-hero-portrait-tilt"
+              options={{ max: 14, scale: 1.04, perspective: 1200, speed: 700 }}
+            >
+              <img
+                src={heroPortrait}
+                alt=""
+                className="home-hero-portrait"
+              />
+            </Tilt>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Projects Section */}
+      <section id="projects" className="home-projects-section theme-section-muted relative overflow-hidden py-24">
+        <div className="home-projects-decor" aria-hidden="true">
+          <div className="tech-wheel home-projects-wheel" />
+          <div className="shade-gradient home-projects-glow-a" />
+          <div className="shade-gradient home-projects-glow-b" />
+        </div>
+        <motion.div
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <motion.span variants={itemVariants} className="home-section-eyebrow">
+            Selected Work
+          </motion.span>
+          <ProjectsHeading text={CONTENT.projects.title} />
+          <div className="home-projects-grid grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {(CONTENT.projects.items ?? []).map((project, index) => (
+              <Tilt
+                key={project.title}
+                className="home-project-tilt"
+                options={{ max: 10, scale: 1.02, perspective: 1200, speed: 600 }}
+              >
+                <motion.div
+                  variants={itemVariants}
+                  className="glass-card home-project-card overflow-hidden rounded-2xl h-full flex flex-col"
+                  whileHover={{ y: -8, boxShadow: "var(--shadow-lifted)" }}
+                >
+                  {index === 0 ? <span className="home-project-badge">Latest Build</span> : null}
+                  <div className={`project-image-shell project-image-shell--card ${project.imageShellClassName ?? ""}`}>
+                    <motion.img
+                      src={project.image}
+                      alt={project.title}
+                      className="h-full w-full object-contain"
+                      whileHover={{ scale: 1.06 }}
+                      transition={{ duration: 0.4 }}
+                    />
+                  </div>
+                  <div className="home-project-card-body flex flex-1 flex-col p-6">
+                    <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                      {project.title}
+                    </h3>
+                    {project.timeline ? (
+                      <p className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
+                        {project.timeline}
+                      </p>
+                    ) : null}
+                    <p className="home-project-description theme-muted mb-4 flex-1 text-sm">
+                      {project.description}
+                    </p>
+                    {project.link ? (
+                      <motion.a
+                        href={project.link}
+                        whileHover={{ x: 6 }}
+                        className="theme-link font-medium"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {project.linkLabel ?? "View Project"}
+                      </motion.a>
+                    ) : (
+                      <span className="theme-muted font-medium">Preview on request</span>
+                    )}
+                  </div>
+                </motion.div>
+              </Tilt>
+            ))}
+          </div>
+          <motion.div className="mt-12 flex justify-center" variants={itemVariants}>
+            <motion.a
+              href="/projects"
+              className="theme-button-secondary px-6 py-3"
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              View All Projects
+            </motion.a>
           </motion.div>
         </motion.div>
       </section>
@@ -742,143 +799,6 @@ const Home = () => {
               </motion.div>
             </motion.div>
           </div>
-        </motion.div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="theme-section-muted py-20">
-        <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <ProjectsHeading text={CONTENT.projects.title} />
-          <div className="home-project-grid grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {(CONTENT.projects.items ?? []).map((project) => (
-              <motion.div
-                key={project.title}
-                variants={itemVariants}
-                className="glass-card home-project-card overflow-hidden rounded-lg shadow-lg backdrop-blur-sm"
-                whileHover={{ scale: 1.03, rotate: 1.2, boxShadow: "var(--shadow-lifted)" }}
-              >
-                <div className={`project-image-shell project-image-shell--card project-image-shell--compact ${project.imageShellClassName ?? ""}`}>
-                  <motion.img
-                    src={project.image}
-                    alt={project.title}
-                    className="h-full w-full object-contain"
-                    variants={imageVariants}
-                    whileHover="hover"
-                  />
-                </div>
-                <div className="home-project-card-body p-6">
-                  <motion.h3 variants={textVariants} className="mb-2 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                    {project.title}
-                  </motion.h3>
-                  {project.timeline ? (
-                    <motion.p variants={textVariants} className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
-                      {project.timeline}
-                    </motion.p>
-                  ) : null}
-                  <motion.p variants={textVariants} className="home-project-description theme-muted mb-4 text-sm">
-                    {project.description}
-                  </motion.p>
-                  {project.link ? (
-                    <motion.a
-                      href={project.link}
-                      variants={textVariants}
-                      whileHover={{ x: 10 }}
-                      className="theme-link font-medium"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {project.linkLabel ?? "View Project"}
-                    </motion.a>
-                  ) : (
-                    <motion.span variants={textVariants} className="theme-muted font-medium">
-                      Preview on request
-                    </motion.span>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Portfolio Section */}
-      <section id="portfolio" className="theme-section-soft py-20 backdrop-blur-sm">
-        <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <PortfolioHeading text={CONTENT.portfolio.title} />
-          <div className="home-project-grid grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {(CONTENT.portfolio.items ?? []).map((item) => (
-              <motion.div
-                key={item.title}
-                variants={itemVariants}
-                className="glass-card home-project-card overflow-hidden rounded-lg shadow-lg backdrop-blur-sm"
-                whileHover={{ scale: 1.03, rotate: 1.2, boxShadow: "var(--shadow-lifted)" }}
-              >
-                <div className={`project-image-shell project-image-shell--card project-image-shell--compact ${item.imageShellClassName ?? ""}`}>
-                  <motion.img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-full w-full object-contain"
-                    variants={imageVariants}
-                    whileHover="hover"
-                  />
-                </div>
-                <div className="home-project-card-body p-6">
-                  <motion.h3 variants={textVariants} className="mb-2 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                    {item.title}
-                  </motion.h3>
-                  {item.timeline ? (
-                    <motion.p variants={textVariants} className="project-timeline mb-2 text-xs font-semibold uppercase tracking-wide">
-                      {item.timeline}
-                    </motion.p>
-                  ) : null}
-                  <motion.p variants={textVariants} className="home-project-description theme-muted mb-4 text-sm">
-                    {item.description}
-                  </motion.p>
-                  {item.link ? (
-                    <motion.a
-                      href={item.link}
-                      variants={textVariants}
-                      whileHover={{ x: 10 }}
-                      className="theme-link font-medium"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {item.linkLabel ?? "View Live Site"}
-                    </motion.a>
-                  ) : (
-                    <motion.span variants={textVariants} className="theme-muted font-medium">
-                      Preview on request
-                    </motion.span>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          <motion.div
-            className="mt-10 flex justify-center"
-            variants={itemVariants}
-          >
-            <motion.a
-              href="/projects"
-              className="theme-button-secondary px-6 py-3"
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              View More Projects
-            </motion.a>
-          </motion.div>
         </motion.div>
       </section>
 
